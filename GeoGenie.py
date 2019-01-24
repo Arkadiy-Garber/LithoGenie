@@ -1,28 +1,11 @@
 #!/usr/bin/env python3
-# !/bin/sh
 from collections import defaultdict
 import re
 import os
 import textwrap
 import argparse
-import urllib.request
-import ssl
-
-gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-
-#!/usr/bin/env python3
-from collections import defaultdict
-import re
-import os
-import textwrap
-import argparse
-import urllib.request
-import ssl
 import sys
 
-
-# TODO: ADD CYTOCHROME 579 HMM (next release)
 # TODO: ADD BITSCORE CUTOFF FOR EACH HMM HIT
 
 
@@ -703,15 +686,6 @@ outHeat.close()
 
 
 # ******** RUNNING RSCRIPT TO GENERATE PLOTS **************
-# os.system("Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
-# os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
-
 if args.makeplots == "y":
     if conda == 0:
         Rdir = args.R
@@ -721,6 +695,15 @@ if args.makeplots == "y":
         for i in file:
             Rdir = (i.rstrip())
         os.system("rm r.txt")
+
+    os.system("Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
+    os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
 
     os.system("Rscript --vanilla %s/DotPlot.R %s/%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.outdir))
     os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.outdir))
