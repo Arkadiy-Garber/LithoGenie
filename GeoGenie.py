@@ -263,6 +263,7 @@ file = open("HMMlib.txt")
 for i in file:
     location = i.rstrip()
 
+os.system("rm HMMlib.txt")
 try:
     bitscores = open(location)
     conda = 1
