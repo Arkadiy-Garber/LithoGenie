@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# !/bin/sh
 from collections import defaultdict
 import re
 import os
@@ -237,7 +238,6 @@ parser = argparse.ArgumentParser(
     *******************************************************
     '''))
 
-parser.add_argument('-hmm_dir', type=str, help='directory of HMMs')
 parser.add_argument('-bin_dir', type=str, help="directory of bins")
 parser.add_argument('-bin_ext', type=str, help="extension for bins (do not include the period)")
 parser.add_argument('-out', type=str, help="basename of output file", default="out")
@@ -338,8 +338,7 @@ if conda == 1:
 else:
     HMMdir = args.hmm_dir
     HMMdirLS = os.listdir(args.hmm_dir)
-    print(HMMdir)
-    print(HMMdirLS)
+
 
 
 # STARTING MAIN ALGORITHM
