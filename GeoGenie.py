@@ -366,18 +366,18 @@ for i in binDirLS:
 
         except FileNotFoundError:
             if args.contigs_source == "single":
-                os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out" % (binDir, i, binDir, i, binDir, i))
+                os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
             elif args.contigs_source == "meta":
-                os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -p meta" % (binDir, i, binDir, i, binDir, i))
+                os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -p meta -q" % (binDir, i, binDir, i, binDir, i))
             else:
                 print("WARNING: you did not specify whether the provided FASTA files are single genomes or "
                       "metagenome/metatranscriptome assemblies. By default, FeGenie is assuming that these are "
                       "single genomes, and running Prodigal accordingly. Just an FYI.")
-                os.system("prodigal -i %s%s -a %s%s-proteins.faa -o %s%s-prodigal.out" % (binDir, i, binDir, i, binDir, i))
+                os.system("prodigal -i %s%s -a %s%s-proteins.faa -o %s%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
 
 
-        print("")
-        print("analyzing " + i)
+        # print("")
+        # print("analyzing " + i)
         fastaFile = open(args.bin_dir + "/" + i + "-proteins.faa", "r")
         fastaFile = fasta(fastaFile)
         os.system("mkdir " + args.bin_dir + "/" + i + "-HMM")
@@ -388,7 +388,7 @@ for i in binDirLS:
                 perc = (count/len(HMMdirLS))*100
                 # print(str(perc) + "%")
                 # print("%.2f" % perc + "% done")
-                sys.stdout.write("Download progress: %d%%   \r" % (perc))
+                sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc))
                 sys.stdout.flush()
                 if not re.match(r'^\.', hmm):
                     os.system("hmmsearch "
