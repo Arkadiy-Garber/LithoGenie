@@ -386,7 +386,8 @@ for i in binDirLS:
             if hmm != "hmm-meta.txt":
                 count += 1
                 perc = (count/len(HMMdirLS))*100
-                print(str(perc) + "%")
+                # print(str(perc) + "%")
+                print("%.2f" % perc + "% done")
                 if not re.match(r'^\.', hmm):
                     os.system("hmmsearch "
                               "--tblout " + binDir + "/" + i + "-HMM/" + i + "__" + hmm +
