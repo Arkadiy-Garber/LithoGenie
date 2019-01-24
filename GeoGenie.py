@@ -713,5 +713,10 @@ if args.makeplots == "y":
     os.system("Rscript --vanilla %s/DotPlot.R %s/%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.outdir))
     os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.outdir))
 
+# REMOVING INTERMEDIATE FILES AND RENAMING FINAL OUTPUT FILES
+os.system("rm %s/%s.csv" % (args.outdir, args.out))
+os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
+os.system("mv %s/%s-3.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
+
 print("...")
 print("Finished!")
