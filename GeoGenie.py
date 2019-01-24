@@ -464,7 +464,6 @@ for i in binDirLS:
         os.system("rm -r " + args.bin_dir + "/" + i + "-HMM")
 
 out.close()
-print("Finished")
 
 
 summaryDict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 'EMPTY')))
