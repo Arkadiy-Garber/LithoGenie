@@ -351,6 +351,8 @@ for i in bits:
     bitDict[ls[0]]["bit"] = ls[1]
     bitDict[ls[0]]["process"] = ls[2]
     bitDict[ls[0]]["element"] = ls[3]
+print("...")
+print("")
 
 count = 0
 BinDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
@@ -365,6 +367,7 @@ for i in binDirLS:
             print("ORFS for %s found. Skipping Prodigal, and going with %s-proteins.faa" % (i, i))
 
         except FileNotFoundError:
+            print("Finding ORFs for " + i)
             if args.contigs_source == "single":
                 os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
             elif args.contigs_source == "meta":
@@ -378,6 +381,8 @@ for i in binDirLS:
 
         # print("")
         # print("analyzing " + i)
+        print("...")
+        print("")
         fastaFile = open(args.bin_dir + "/" + i + "-proteins.faa", "r")
         fastaFile = fasta(fastaFile)
         os.system("mkdir " + args.bin_dir + "/" + i + "-HMM")
