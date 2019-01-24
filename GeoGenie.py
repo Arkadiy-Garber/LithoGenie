@@ -491,7 +491,8 @@ for i in summary:
 
 
 # ****************************** CLUSTERING OF ORFS BASED ON GENOMIC PROXIMITY *************************************
-
+print("")
+print("")
 print("Identifying genomic proximities and putative operons")
 CoordDict = defaultdict(lambda: defaultdict(list))
 for i in summaryDict.keys():
@@ -502,8 +503,9 @@ for i in summaryDict.keys():
             CoordDict[i][contig].append(int(numOrf))
 
 counter = 0
+print(".")
 print("Clustering ORFs...")
-print("")
+print(".")
 out = open("%s/%s-2.csv" % (args.outdir, args.out), "w")
 for i in CoordDict.keys():
     for j in CoordDict[i]:
@@ -546,7 +548,8 @@ for i in summary:
         clusterDict[ls[9]]["gene"].append(ls[2])
         clusterDict[ls[9]]["category"].append(ls[0])
 
-
+print("..")
+print("...")
 out = open("%s/%s-3.csv" % (args.outdir, args.out), "w")
 for i in (clusterDict.keys()):
     ls = (clusterDict[i]["gene"])
@@ -657,6 +660,8 @@ out.close()
 
 
 # ****************************** CREATING A HEATMAP-COMPATIBLE CSV FILE *************************************
+print("....")
+print(".....")
 # print("Writing heatmap-compatible CSV")
 cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon-fixation",
         "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "organic-carbon-oxidation",
@@ -726,5 +731,6 @@ os.system("rm %s/%s.csv" % (args.outdir, args.out))
 os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
 os.system("mv %s/%s-3.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
 
-print("...")
+print('......')
+print(".......")
 print("Finished!")
