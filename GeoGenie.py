@@ -367,6 +367,7 @@ for i in binDirLS:
             print("ORFS for %s found. Skipping Prodigal, and going with %s-proteins.faa" % (i, i))
 
         except FileNotFoundError:
+            print("\n\n")
             print("Finding ORFs for " + i)
             if args.contigs_source == "single":
                 os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
@@ -381,8 +382,6 @@ for i in binDirLS:
 
         # print("")
         # print("analyzing " + i)
-        print("...")
-        print("")
         fastaFile = open(args.bin_dir + "/" + i + "-proteins.faa", "r")
         fastaFile = fasta(fastaFile)
         os.system("mkdir " + args.bin_dir + "/" + i + "-HMM")
