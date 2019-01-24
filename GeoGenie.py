@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# !/bin/sh
 from collections import defaultdict
 import re
 import os
