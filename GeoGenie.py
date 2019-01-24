@@ -315,8 +315,6 @@ if conda == 1:
     for i in file:
         HMMdir = (i.rstrip())
         HMMdirLS = os.listdir(HMMdir)
-        print(HMMdir)
-        print(HMMdirLS)
     os.system("rm HMMlib.txt")
 else:
     HMMdir = args.hmm_dir
