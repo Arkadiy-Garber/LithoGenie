@@ -19,6 +19,7 @@ import textwrap
 import argparse
 import urllib.request
 import ssl
+import sys
 
 
 # TODO: ADD CYTOCHROME 579 HMM (next release)
@@ -294,20 +295,6 @@ if conda == 0:
         raise SystemExit
 
 
-try:
-    os.listdir(args.outdir)
-    print("Looks like you already have a directory with the name: " + args.outdir)
-    print("To avoid overwriting potentially valuable files, FeGenie will now exit. "
-          "Please delete or rename said directory and try running again.")
-    print("Exiting")
-    raise SystemExit
-except FileNotFoundError:
-    print(".")
-    os.system("mkdir %s" % args.outdir)
-    outDirectory = "%s" % args.outdir
-    outDirectoryLS = os.listdir("%s" % args.outdir)
-
-
 if args.bin_dir != "NA":
     binDir = args.bin_dir + "/"
     binDirLS = os.listdir(args.bin_dir)
@@ -340,6 +327,19 @@ else:
     HMMdir = args.hmm_dir
     HMMdirLS = os.listdir(args.hmm_dir)
 
+
+try:
+    os.listdir(args.outdir)
+    print("Looks like you already have a directory with the name: " + args.outdir)
+    print("To avoid overwriting potentially valuable files, FeGenie will now exit. "
+          "Please delete or rename said directory and try running again.")
+    print("Exiting")
+    raise SystemExit
+except FileNotFoundError:
+    print(".")
+    os.system("mkdir %s" % args.outdir)
+    outDirectory = "%s" % args.outdir
+    outDirectoryLS = os.listdir("%s" % args.outdir)
 
 
 # STARTING MAIN ALGORITHM
@@ -387,7 +387,9 @@ for i in binDirLS:
                 count += 1
                 perc = (count/len(HMMdirLS))*100
                 # print(str(perc) + "%")
-                print("%.2f" % perc + "% done")
+                # print("%.2f" % perc + "% done")
+                sys.stdout.write("Download progress: %d%%   \r" % (perc))
+                sys.stdout.flush()
                 if not re.match(r'^\.', hmm):
                     os.system("hmmsearch "
                               "--tblout " + binDir + "/" + i + "-HMM/" + i + "__" + hmm +
