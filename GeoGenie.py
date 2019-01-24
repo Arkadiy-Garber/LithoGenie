@@ -367,7 +367,7 @@ for i in binDirLS:
             print("ORFS for %s found. Skipping Prodigal, and going with %s-proteins.faa" % (i, i))
 
         except FileNotFoundError:
-            print(".")
+            print("")
             print(".")
             print("Finding ORFs for " + i)
             if args.contigs_source == "single":
