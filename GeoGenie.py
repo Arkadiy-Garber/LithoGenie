@@ -352,7 +352,7 @@ for i in bits:
     bitDict[ls[0]]["process"] = ls[2]
     bitDict[ls[0]]["element"] = ls[3]
 print("...")
-print("")
+
 
 count = 0
 BinDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
@@ -367,7 +367,8 @@ for i in binDirLS:
             print("ORFS for %s found. Skipping Prodigal, and going with %s-proteins.faa" % (i, i))
 
         except FileNotFoundError:
-            print("\n\n")
+            print(".")
+            print(".")
             print("Finding ORFs for " + i)
             if args.contigs_source == "single":
                 os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
@@ -392,7 +393,7 @@ for i in binDirLS:
                 perc = (count/len(HMMdirLS))*100
                 # print(str(perc) + "%")
                 # print("%.2f" % perc + "% done")
-                sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc))
+                sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc+1))
                 sys.stdout.flush()
                 if not re.match(r'^\.', hmm):
                     os.system("hmmsearch "
