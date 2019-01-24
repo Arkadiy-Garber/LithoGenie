@@ -10,7 +10,7 @@ git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 ./GeoGenie.py -h
 
 ## Quickstart without conda
-(2 additional arguments required here: location of the HMM and rscripts directories)
+(2 additional arguments required here when running the program: '-hmm_dir' for the location of the HMM direcotry and '-R' for the location of the directory that contains the R scripts. Latter is optional)
 
 git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 
