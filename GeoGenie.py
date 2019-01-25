@@ -210,12 +210,12 @@ def delim(line):
 
 
 parser = argparse.ArgumentParser(
-    prog="FeGenie.py",
+    prog="GeoGenie.py",
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''
     *******************************************************
 
-    Developed by Arkadiy Garber and Nancy Merino;
+    Developed by Arkadiy Garber and Gustavo Ramírez;
     University of Southern California, Earth Sciences
     Please send comments and inquiries to arkadiyg@usc.edu
 
@@ -298,11 +298,11 @@ else:
 
 
 if args.makeplots == 'y':
-    if args.R != "NA":
-        print(".")
-    else:
-        if conda == 0:
-            print('Looks like you told FeGenie to automatically generate R plots. '
+    if conda == 0:
+        if args.R != "NA":
+            print(".")
+        else:
+            print('Looks like you told GeoGenie to automatically generate R plots. '
                   'However, you have not provided the location of the directory that contains the R scripts '
                   '(as required of you because you did not go through the conda-based installation.')
             print("Exiting")
