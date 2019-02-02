@@ -611,27 +611,49 @@ for i in (clusterDict.keys()):
         elif "MtrB_TIGR03509.hmm" not in ls:
             pass
 
-    elif "FoxA" in ls or "FoxB" in ls or "FoxC" in ls:
-        foxabc = ["FoxA", "FoxB", "FoxC"]
+    elif "FoxA.hmm" in ls or "FoxB.hmm" in ls or "FoxC.hmm" in ls:
+        foxabc = ["FoxA.hmm", "FoxB.hmm", "FoxC.hmm"]
+
         if unique(ls, foxabc) < 2:
-            pass
-        else:
             for j in clusterDict[i]["line"]:
-                if j[2] not in foxabc:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
-            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
-    elif "FoxE" in ls or "FoxY" in ls or "FoxZ" in ls:
-        foxeyz = ["FoxE", "FoxY", "FoxZ"]
-        if unique(ls, foxeyz) < 2:
-            pass
         else:
-            for j in clusterDict[i]["line"]:
-                if j[2] not in foxeyz:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+            for j in clusterDict[i]["line"]:
+
+                if j[3] not in foxabc:
+                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+
+            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+
+    elif "FoxE.hmm" in ls or "FoxY.hmm" in ls or "FoxZ.hmm" in ls:
+        foxeyz = ["FoxE.hmm", "FoxY.hmm", "FoxZ.hmm"]
+
+        if "FoxE.hmm" not in ls:
+
+            if unique(ls, foxeyz) < 1:
+                pass
+
+            else:
+                for j in clusterDict[i]["line"]:
+                    if j[3] not in foxeyz:
+                        out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+
+
+        else:
+
+            for j in clusterDict[i]["line"]:
+
+                if j[3] not in foxeyz:
+                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+
+            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
     elif "Cyc1" in ls:
         if "Cyc2_repCluster3" not in ls and "Cyc2_repCluster2" not in ls and "Cyc2_repCluster1" not in ls:
@@ -655,9 +677,9 @@ out.close()
 print("....")
 print(".....")
 # print("Writing heatmap-compatible CSV")
-cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon-fixation",
+cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compound-oxidation", "carbon-monoxide-oxidation", "carbon-fixation",
         "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "organic-carbon-oxidation",
-        "carbon", "ROS"]
+        "carbon-disproportionation", "ROS"]
 
 Dict = defaultdict(lambda: defaultdict(list))
 final = open("%s/%s-3.csv" % (args.outdir, args.out), "r")
