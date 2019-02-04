@@ -663,8 +663,8 @@ for i in sorted(clusterDict.keys()):  ###########################
             pass
     ############################################################################################################
     elif "thiosulfate_oxidation_soxB" in ls or "thiosulfate_oxidation_soxY" in ls or "thiosulfate_oxidation_soxC" in ls\
-            or "SoxA" in ls or "SoxX" in ls or "SoxZ" in ls:
-        soxabcxyz = ["thiosulfate_oxidation_soxB", "thiosulfate_oxidation_soxY", "thiosulfate_oxidation_soxC", "SoxA", "SoxX", "SoxZ"]
+            or "soxA" in ls or "soxX" in ls or "soxZ" in ls:
+        soxabcxyz = ["thiosulfate_oxidation_soxB", "thiosulfate_oxidation_soxY", "thiosulfate_oxidation_soxC", "soxA", "soxX", "soxZ"]
 
         if unique(ls, soxabcxyz) < 3:
             if len(remove2(ls, soxabcxyz)) < 1:
