@@ -1297,6 +1297,32 @@ for i in sorted(clusterDict.keys()):  ###########################
             out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
     ############################################################################################################
+    elif "adenylyl_sulfate_kinase_cysC_apsK" in ls or "Sulfate_andenyltransferase_CysN" in ls:
+        cyscn = ["adenylyl_sulfate_kinase_cysC_apsK", "Sulfate_andenyltransferase_CysN"]
+
+        if unique(ls, cyscn) < 2:
+            if len(remove2(ls, cyscn)) < 1:
+                pass
+            else:
+                for j in clusterDict[i]["line"]:
+                    if j[2] not in cyscn:
+                        out.write(
+                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                            j[7] + "," + j[8] + "," + j[9] + "\n")
+
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+
+        else:
+            for j in clusterDict[i]["line"]:
+                out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                    7] + "," + j[8] + "," + j[9] + "\n")
+
+            out.write(
+                "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+
+
+    ############################################################################################################
     elif "dissimilatory_sulfite_reductase_DsrD" in ls or "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrA" in ls \
             or "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrB" in ls or "dsrK" in ls or "dsrM" in ls \
             or "dsrE" in ls or "dsrF" in ls or "dsrH" in ls or "dsrC" in ls:
@@ -1339,9 +1365,9 @@ out.close()
 print("....")
 print(".....")
 # print("Writing heatmap-compatible CSV")
-cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compound-oxidation", "carbon-monoxide-oxidation", "carbon-fixation",
-        "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "organic-carbon-oxidation",
-        "carbon-disproportionation", "ROS"]
+cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
+        "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "organic-carbon",
+        "carbon", "ROS"]
 
 Dict = defaultdict(lambda: defaultdict(list))
 final = open("%s/%s-3.csv" % (args.outdir, args.out), "r")
