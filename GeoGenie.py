@@ -357,6 +357,7 @@ for i in binDirLS:
 
         try:
             testFile = open("%s/%s-proteins.faa" % (binDir, i), "r")
+            print("")
             print("ORFS for %s found. Skipping Prodigal, and going with %s-proteins.faa" % (i, i))
 
         except FileNotFoundError:
@@ -611,8 +612,8 @@ for i in sorted(clusterDict.keys()):  ###########################
         elif "MtrB_TIGR03509.hmm" not in ls:
             pass
     ############################################################################################################
-    elif "FoxA.hmm" in ls or "FoxB.hmm" in ls or "FoxC.hmm" in ls:
-        foxabc = ["FoxA.hmm", "FoxB.hmm", "FoxC.hmm"]
+    elif "FoxA" in ls or "FoxB" in ls or "FoxC" in ls:
+        foxabc = ["FoxA", "FoxB", "FoxC"]
 
         if unique(ls, foxabc) < 2:
             for j in clusterDict[i]["line"]:
@@ -629,10 +630,10 @@ for i in sorted(clusterDict.keys()):  ###########################
 
             out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
     ############################################################################################################
-    elif "FoxE.hmm" in ls or "FoxY.hmm" in ls or "FoxZ.hmm" in ls:
-        foxeyz = ["FoxE.hmm", "FoxY.hmm", "FoxZ.hmm"]
+    elif "FoxE" in ls or "FoxY" in ls or "FoxZ" in ls:
+        foxeyz = ["FoxE", "FoxY", "FoxZ"]
 
-        if "FoxE.hmm" not in ls:
+        if "FoxE" not in ls:
 
             if unique(ls, foxeyz) < 1:
                 pass
