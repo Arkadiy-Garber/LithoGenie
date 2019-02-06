@@ -1367,8 +1367,7 @@ print("....")
 print(".....")
 # print("Writing heatmap-compatible CSV")
 cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-        "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "organic-carbon",
-        "carbon", "ROS"]
+        "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
 
 Dict = defaultdict(lambda: defaultdict(list))
 final = open("%s/%s-3.csv" % (args.outdir, args.out), "r")
