@@ -248,6 +248,8 @@ parser.add_argument('--only_heat', type=str, help="subvert all other functions o
                                                   " heatmap. Please provide the output directory using the \'-outdir\' flag; this already must "
                                                   "contain the output summary file from a previously completed run. y = yes, n = no (default = n)", default="n")
 
+parser.add_argument('--cpu', type=int, help="number of threads to allow for hmmsearch (default = 1)", default=1)
+
 
 
 # CHECKING FOR CONDA INSTALL
@@ -403,8 +405,8 @@ if args.only_heat == "n":
                     sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc+1))
                     sys.stdout.flush()
                     if not re.match(r'^\.', hmm):
-                        os.system("hmmsearch "
-                                  "--tblout " + binDir + "/" + i + "-HMM/" + i + "__" + hmm +
+                        os.system("hmmsearch --cpu " + str(args.cpu) +
+                                  " --tblout " + binDir + "/" + i + "-HMM/" + i + "__" + hmm +
                                   " -o " + binDir + "/" + i + "-HMM/" + i + "__" + hmm + ".txt " +
                                   HMMdir + "/" + hmm + " " +
                                   binDir + "/" + i + "-proteins.faa")
