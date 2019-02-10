@@ -631,7 +631,7 @@ if args.only_heat == "n":
             foxabc = ["FoxA", "FoxB", "FoxC"]
 
             if unique(ls, foxabc) < 2:
-                if len(remove2(ls, mam)) < 1:
+                if len(remove2(ls, foxabc)) < 1:
                     pass
 
                 else:
@@ -652,13 +652,16 @@ if args.only_heat == "n":
             foxeyz = ["FoxE", "FoxY", "FoxZ"]
 
             if "FoxE" not in ls:
+                print(ls)
 
-                if unique(ls, foxeyz) < 1:
+                if len(remove2(ls, foxeyz)) < 1:
                     pass
 
                 else:
                     for j in clusterDict[i]["line"]:
+                        print(j)
                         if j[2] not in foxeyz:
+                            print(j[2])
                             out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
                     out.write(
