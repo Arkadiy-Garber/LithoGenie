@@ -654,6 +654,7 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[3] not in foxeyz:
+                            print(j[3])
                             out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
                     out.write(
@@ -667,11 +668,12 @@ if args.only_heat == "n":
                 out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Cyc1" in ls:
-            if "Cyc2_repCluster3" not in ls and "Cyc2_repCluster2" not in ls and "Cyc2_repCluster1" not in ls:
+            if ("Cyc2_repCluster3" not in ls and "Cyc2_repCluster2" not in ls and "Cyc2_repCluster1" not in ls and
+                        "MtoA" not in ls and "MtrB_TIGR03509" not in ls and "MtrA" not in ls and "MtrC_TIGR03507" not in ls):
                 pass
         ############################################################################################################
         elif "CymA" in ls:
-            if "MtrB_TIGR03509" not in ls and "MtrA" not in ls and "MtoA" not in ls and "MtrC_TIGR03507" not in ls:
+            if ("MtrB_TIGR03509" not in ls and "MtrA" not in ls and "MtoA" not in ls and "MtrC_TIGR03507" not in ls):
                 pass
         ############################################################################################################
         elif "thiosulfate_oxidation_soxB" in ls or "thiosulfate_oxidation_soxY" in ls or "thiosulfate_oxidation_soxC" in ls\
