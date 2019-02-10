@@ -665,7 +665,6 @@ if args.only_heat == "n":
                         "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
-                print(ls)
                 for j in clusterDict[i]["line"]:
                     out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
