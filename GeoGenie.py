@@ -631,10 +631,15 @@ if args.only_heat == "n":
             foxabc = ["FoxA", "FoxB", "FoxC"]
 
             if unique(ls, foxabc) < 2:
-                for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+                if len(remove2(ls, mam)) < 1:
+                    pass
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                else:
+                    for j in clusterDict[i]["line"]:
+                        if j[2] not in foxabc:
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+
+                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
 
@@ -653,8 +658,7 @@ if args.only_heat == "n":
 
                 else:
                     for j in clusterDict[i]["line"]:
-                        if j[3] not in foxeyz:
-                            print(j[3])
+                        if j[2] not in foxeyz:
                             out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
                     out.write(
