@@ -1380,8 +1380,8 @@ if args.only_heat == "n":
 
     out.close()
 
-    os.system("rm %s/%s.csv" % (args.outdir, args.out))
-    os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
+    # os.system("rm %s/%s.csv" % (args.outdir, args.out))
+    # os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
     os.system("mv %s/%s-3.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
     # ****************************** CREATING A HEATMAP-COMPATIBLE CSV FILE *************************************
     print("....")
@@ -1610,7 +1610,7 @@ if args.makeplots == "y":
     os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
     os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
 
-    os.system("Rscript --vanilla %s/DotPlot.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
+    os.system(";l" % (Rdir, args.outdir, args.out, args.element, args.outdir))
     os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
 
 
