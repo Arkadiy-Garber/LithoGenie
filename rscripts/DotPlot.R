@@ -33,15 +33,15 @@ colnames(FeGenie.data.melt)[colnames(FeGenie.data.melt)=="value"] <- "Normalized
 
 # ----------------- output files
 outfile = paste(args[2], "Fegenie-dotplot.tiff", sep = "/", collapse = NULL)
-tiff(outfile, units="in", width=12, height=10, res=300)
+tiff(outfile, units="in", width=24, height=20, res=300)
 
 FeGenie.data.melt$Normalized_gene_abundance = as.character(FeGenie.data.melt$Normalized_gene_abundance)
 FeGenie.data.melt$Normalized_gene_abundance = as.numeric(FeGenie.data.melt$Normalized_gene_abundance)
 
 FeGenie.meta.plot <- ggplot(FeGenie.data.melt, aes(x = X, y = Iron_category, size = Normalized_gene_abundance), alpha=0.7) +
   geom_point(aes(color=Iron_category)) +
-  scale_size_area(max_size = 10) +
-  labs(x="", y="Iron Category") +
+  scale_size_area(max_size = 20) +
+  labs(x="", y="Category") +
   scale_y_discrete(labels=c("iron_aquisition-iron_uptake" = "Iron uptake", 
                             "iron_aquisition-heme_uptake" = "Heme uptake", 
                             "iron_aquisition-heme_lyase" = "Heme lyase", 
@@ -51,15 +51,15 @@ FeGenie.meta.plot <- ggplot(FeGenie.data.melt, aes(x = X, y = Iron_category, siz
                             "iron_oxidation" = "Iron oxidation", 
                             "iron_reduction" = "Iron reduction", 
                             "iron_storage" = "Iron storage")) +
-  theme(panel.background = element_rect(fill = "white", colour = "black", size = 1, linetype = "solid"),
-        panel.border = element_rect(colour="black", size=1, fill=NA),
+  theme(panel.background = element_rect(fill = "white", colour = "black", size = 6, linetype = "solid"),
+        panel.border = element_rect(colour="black", size=6, fill=NA),
         strip.background=element_rect(fill='white', colour='white'),
-        strip.text = element_text(face="bold", size=10),
-        panel.grid.major = element_line(size = 0),
-        panel.grid.minor = element_line(size = 0),
-        axis.text = element_text(size=12, colour="black"),
-        axis.title = element_text(face="bold", size=14),
-        axis.text.x = element_text(vjust = 1, angle = 45, color = "black", size = 12, hjust=1),
+        strip.text = element_text(face="bold", size=32),
+        panel.grid.major = element_line(size = 1),
+        panel.grid.minor = element_line(size = 1),
+        axis.text = element_text(size=32, colour="black"),
+        axis.title = element_text(face="bold", size=32),
+        axis.text.x = element_text(vjust = 1, angle = 45, color = "black", size = 32, hjust=1),
         legend.position="right")
 
 FeGenie.meta.plot
