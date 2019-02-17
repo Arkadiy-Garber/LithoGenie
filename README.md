@@ -23,3 +23,7 @@ git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 ## Basic usage
 
     ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa/fasta/txt/... -outdir geogenie_outdir -out ouputBasename
+    
+Make sure to include the location of the hmm library used by GeoGenie:
+
+    ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa/fasta/txt/... -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/
