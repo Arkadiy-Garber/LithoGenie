@@ -219,6 +219,33 @@ parser = argparse.ArgumentParser(
     University of Southern California, Earth Sciences
     Please send comments and inquiries to arkadiyg@usc.edu
 
+                                  .-=-.
+                         /  ! ) )
+                      __ \__/__/
+                     / _<( ^.^ )   Your wish is my command...
+                    / /   \ c /O
+                    \ \_.-./=\.-._     _
+                     `-._  `~`    `-,./_<
+                         `\' \'\`'----'
+                       *   \  . \          *
+                            `-~~~\   .
+                       .      `-._`-._   *
+                             *    `~~~-,      *
+                   ()                   * )
+                  <^^>             *     (   .
+                 .-""-.                    )
+      .---.    ."-....-"-._     _...---''`/. '
+     ( (`\ \ .'            ``-''    _.-"'`
+      \ \ \ : :.                 .-'
+       `\`.\: `:.             _.'
+       (  .'`.`            _.'
+        ``    `-..______.-'
+                  ):.  (
+                ."-....-".
+              .':.        `.
+              "-..______..-"
+
+
     *******************************************************
     '''))
 
@@ -652,16 +679,13 @@ if args.only_heat == "n":
             foxeyz = ["FoxE", "FoxY", "FoxZ"]
 
             if "FoxE" not in ls:
-                print(ls)
 
                 if len(remove2(ls, foxeyz)) < 1:
                     pass
 
                 else:
                     for j in clusterDict[i]["line"]:
-                        print(j)
                         if j[2] not in foxeyz:
-                            print(j[2])
                             out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
                     out.write(
@@ -1380,8 +1404,8 @@ if args.only_heat == "n":
 
     out.close()
 
-    # os.system("rm %s/%s.csv" % (args.outdir, args.out))
-    # os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
+    os.system("rm %s/%s.csv" % (args.outdir, args.out))
+    os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
     os.system("mv %s/%s-3.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
     # ****************************** CREATING A HEATMAP-COMPATIBLE CSV FILE *************************************
     print("....")
@@ -1601,16 +1625,16 @@ if args.makeplots == "y":
             Rdir = (i.rstrip())
         os.system("rm r.txt")
 
-    os.system("Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
-    os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
+    # os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
 
-    os.system(";l" % (Rdir, args.outdir, args.out, args.element, args.outdir))
+    os.system("Rscript --vanilla %s/DotPlot.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
     os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
 
 
