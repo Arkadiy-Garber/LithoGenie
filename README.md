@@ -45,6 +45,11 @@ Copy and paste the following commands into your terminal window (these commands 
 
     ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa/fasta/txt/... -outdir geogenie_outdir -out ouputBasename
     
-Make sure to include the location of the hmm library used by GeoGenie:
+Make sure to include the location of the hmm library used by GeoGenie if you did not install with Conda:
 
-    ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa/fasta/txt/... -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/
+    ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/
+    
+Example usgae if you already ran geoGenie, but would just like to generate new heatmaps and plots for a specific element or class of molecules (in this case, iron):
+
+    ./GeoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename --makeplots y --heat_only y --element iron
+
