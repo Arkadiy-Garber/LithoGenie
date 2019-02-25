@@ -9,6 +9,8 @@ gitMore clone https://github.com/Arkadiy-Garber/GeoGenie.git
 
 ./setup.sh
 
+conda activate genie
+
 ./GeoGenie.py -h
 
 ## Quickstart without conda
@@ -19,6 +21,11 @@ git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 ./setup_noconda.sh
 
 ./GeoGenie.py -h
+
+# Required dependencies if installing without conda
+
+-Prodigal (https://github.com/hyattpd/Prodigal)
+-HMMER (http://hmmer.org)
 
 ## Installing required R packages using Rscript:
 
