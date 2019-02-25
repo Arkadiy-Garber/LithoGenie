@@ -11,7 +11,7 @@ gitMore clone https://github.com/Arkadiy-Garber/GeoGenie.git
 
 conda activate genie
 
-./GeoGenie.py -h
+GeoGenie.py -h
 
 ## Quickstart without conda
 (2 additional arguments required when running the program with the installation without conda: '-hmm_dir' for the location of the HMM direcotry and '-R' for the location of the directory that contains the R scripts.
@@ -25,6 +25,7 @@ git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 # Required dependencies if installing without conda
 
 -Prodigal (https://github.com/hyattpd/Prodigal)
+
 -HMMER (http://hmmer.org)
 
 ## Installing required R packages using Rscript:
