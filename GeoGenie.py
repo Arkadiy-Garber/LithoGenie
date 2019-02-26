@@ -219,7 +219,15 @@ parser = argparse.ArgumentParser(
     University of Southern California, Earth Sciences
     Please send comments and inquiries to arkadiyg@usc.edu
 
-                                                                                                                       
+        __ ,                  __ ,                       
+      ,-| ~                 ,-| ~                        
+     ('||/__,              ('||/__,              '       
+    (( |||  |  _-_   /'\\ (( |||  |  _-_  \\/\\ \\  _-_  
+    (( |||==| || \\ || || (( |||==| || \\ || || || || \\ 
+     ( / |  , ||/   || ||  ( / |  , ||/   || || || ||/   
+      -____/  \\,/  \\,/    -____/  \\,/  \\ \\ \\ \\,/  
+                                                     
+                                                                                                                                                                            
                                                               .%*,.  /                                                 
                                                           ,*%@&&&@&@@@@#                                               
                                                         /&@&&%&&&&%#&%@%@#                                             
@@ -301,7 +309,10 @@ parser = argparse.ArgumentParser(
                                 ."-....-".
                               .':.        `.
                               "-..______..-"                                                                                                                       
-                                                                                                                       
+                                                                                                                           
+    
+    Image design: Kazuki Takahashi (1996);
+    ASCII art: https://manytools.org/hacker-tools/convert-images-to-ascii-art/ 
     *******************************************************
     '''))
 
