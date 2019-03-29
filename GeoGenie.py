@@ -1483,26 +1483,29 @@ if args.only_heat == "n":
     summary = open("%s/%s-summary.csv" % (args.outdir, args.out))
     for i in summary:
         if not re.match(r'#', i):
-            ls = i.rstrip().split(",")
-            clu = ls[9]
-            cat = ls[1]
-            dataset = ls[3]
-            orf = ls[4]
-            gene = ls[2]
-            element = ls[0]
-            e = ls[5]
-            bit = ls[6]
-            cutoff = ls[7]
-            seq = ls[8]
-            clusterDict[clu].append(gene + "|" + dataset + "|" + orf)
-            memoryDict[dataset][orf]["cat"] = cat
-            memoryDict[dataset][orf]["gene"] = gene
-            memoryDict[dataset][orf]["bit"] = bit
-            memoryDict[dataset][orf]["cutoff"] = cutoff
-            memoryDict[dataset][orf]["clu"] = clu
-            memoryDict[dataset][orf]["seq"] = seq
-            memoryDict[dataset][orf]["e"] = e
-            memoryDict[dataset][orf]["element"] = element
+            try:
+                ls = i.rstrip().split(",")
+                clu = ls[9]
+                cat = ls[1]
+                dataset = ls[3]
+                orf = ls[4]
+                gene = ls[2]
+                element = ls[0]
+                e = ls[5]
+                bit = ls[6]
+                cutoff = ls[7]
+                seq = ls[8]
+                clusterDict[clu].append(gene + "|" + dataset + "|" + orf)
+                memoryDict[dataset][orf]["cat"] = cat
+                memoryDict[dataset][orf]["gene"] = gene
+                memoryDict[dataset][orf]["bit"] = bit
+                memoryDict[dataset][orf]["cutoff"] = cutoff
+                memoryDict[dataset][orf]["clu"] = clu
+                memoryDict[dataset][orf]["seq"] = seq
+                memoryDict[dataset][orf]["e"] = e
+                memoryDict[dataset][orf]["element"] = element
+            except IndexError:
+                pass
 
     FLEET = ["EetA", "EetB", "FmnA", "DmkA", "FmnB", "PplA", "Ndh2", "DmkB"]
     for i in clusterDict.keys():
