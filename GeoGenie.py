@@ -24,6 +24,30 @@ def unique(ls, ls2):
     return len(unqlist)
 
 
+def checkMam(ls):
+    count = 0
+    uniqueLS = []
+    for i in ls:
+        hmm = i.split("|")[0]
+        if hmm not in uniqueLS:
+            uniqueLS.append(hmm)
+            if memoryDict[hmm] == "magnetosome_formation":
+                count += 1
+    return count
+
+
+def checkFleet(ls):
+    count = 0
+    uniqueLS = []
+    for i in ls:
+        hmm = i.split("|")[0]
+        if hmm not in uniqueLS:
+            uniqueLS.append(hmm)
+            if memoryDict[hmm] in FLEET:
+                count += 1
+    return count
+
+
 def derep(ls):
     outLS = []
     for i in ls:
@@ -634,7 +658,7 @@ if args.only_heat == "n":
     for i in sorted(clusterDict.keys()):  ###########################
         ls = (clusterDict[i]["gene"])
 
-        if "l" in ls or "EetB" in ls or "Ndh2" in ls or "FmnB" in ls or "FmnA" in ls or "DmkA" in ls or "DmkB" in ls or "PplA" in ls:
+        if "EetA" in ls or "EetB" in ls or "Ndh2" in ls or "FmnB" in ls or "FmnA" in ls or "DmkA" in ls or "DmkB" in ls or "PplA" in ls:
             fleet = ["EetA", "EetB", "Ndh2", "FmnB", "FmnA", "DmkA", "DmkB", "PplA"]
 
             if unique(ls, fleet) < 5:  # If there are less than 5 FLEET genes in the cluster
@@ -1451,6 +1475,74 @@ if args.only_heat == "n":
     os.system("rm %s/%s.csv" % (args.outdir, args.out))
     os.system("rm %s/%s-2.csv" % (args.outdir, args.out))
     os.system("mv %s/%s-3.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
+
+    # ****************************** FILTERING OUT FALSE POSITIVES *************************************
+    out = open("%s/%s-summary-fixed.csv" % (args.outdir, args.out), "w")
+    clusterDict = defaultdict(list)
+    memoryDict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 'EMPTY')))
+    summary = open("%s/%s-summary.csv" % (args.outdir, args.out))
+    for i in summary:
+        if not re.match(r'#', i):
+            ls = i.rstrip().split(",")
+            clu = ls[9]
+            cat = ls[1]
+            dataset = ls[3]
+            orf = ls[4]
+            gene = ls[2]
+            element = ls[0]
+            e = ls[5]
+            bit = ls[6]
+            cutoff = ls[7]
+            seq = ls[8]
+            clusterDict[clu].append(gene + "|" + dataset + "|" + orf)
+            memoryDict[dataset][orf]["cat"] = cat
+            memoryDict[dataset][orf]["gene"] = gene
+            memoryDict[dataset][orf]["bit"] = bit
+            memoryDict[dataset][orf]["cutoff"] = cutoff
+            memoryDict[dataset][orf]["clu"] = clu
+            memoryDict[dataset][orf]["seq"] = seq
+            memoryDict[dataset][orf]["e"] = e
+            memoryDict[dataset][orf]["element"] = element
+
+    FLEET = ["EetA", "EetB", "FmnA", "DmkA", "FmnB", "PplA", "Ndh2", "DmkB"]
+    for i in clusterDict.keys():
+        out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+        for j in clusterDict[i]:
+            gene = j.split("|")[0]
+            dataset = j.split("|")[1]
+            orf = j.split("|")[2]
+            cat = memoryDict[dataset][orf]["cat"]
+            if cat == "magnetosome-formation":
+                if checkMam(clusterDict[i]) < 5:
+                    pass
+                else:
+                    out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
+                              memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
+                              orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
+                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                              memoryDict[dataset][orf]["clu"] + "\n")
+
+            elif memoryDict[dataset][orf]["gene"] in FLEET:
+                if checkFleet(clusterDict[i]) < 6:
+                    pass
+                else:
+                    out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
+                              memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
+                              orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
+                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                              memoryDict[dataset][orf]["clu"] + "\n")
+
+            else:
+                out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
+                          memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
+                          orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
+                          memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                          memoryDict[dataset][orf][
+                              "clu"] + "\n")
+    out.close()
+
+    os.system("mv %s/%s-summary-fixed.csv %s/%s-summary.csv" % (args.outdir, args.out, args.outdir, args.out))
+
     # ****************************** CREATING A HEATMAP-COMPATIBLE CSV FILE *************************************
     print("....")
     print(".....")
@@ -1668,15 +1760,6 @@ if args.makeplots == "y":
         for i in file:
             Rdir = (i.rstrip())
         os.system("rm r.txt")
-
-    # os.system("Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'")
-    # os.system("Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'")
 
     os.system("Rscript --vanilla %s/DotPlot.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
     os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
