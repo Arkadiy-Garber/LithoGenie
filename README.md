@@ -32,21 +32,21 @@ git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 
 Copy and paste the following commands into your terminal window (these commands may require super user permissions to run some of these commands, so if you are running FeGenie off a server where you do not have such permissions, Fegenie may not be able to generate R plot automatically for you)
 
-    Rscript -e 'install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("ggplot2", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"reshape\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("reshape", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"reshape2\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("reshape2", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"tidyverse\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("tidyverse", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"argparse\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("argparse", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"ggdendro\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("ggdendro", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"ggpubr\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("ggpubr", repos = "http://cran.us.r-project.org")'
 
-    Rscript -e 'install.packages(\"grid\", repos = \"http://cran.us.r-project.org\")\'
+    Rscript -e 'install.packages("grid", repos = "http://cran.us.r-project.org")'
 
 
 ## Basic usage
