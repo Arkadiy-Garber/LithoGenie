@@ -11,7 +11,7 @@ args <- commandArgs(trailingOnly = TRUE)
 
 FeGenie_heatmap_data_organized <- read.csv(args[1], header = FALSE)
 l = length(FeGenie_heatmap_data_organized)
-fegenie.t <- t(FeGenie_heatmap_data_organized[,3:l-1])
+fegenie.t <- t(FeGenie_heatmap_data_organized[,2:l-1])
 fegenie.matrix = as.matrix(fegenie.t)
 
 colnames(fegenie.t) <- as.vector(FeGenie_heatmap_data_organized$V1)
@@ -32,15 +32,15 @@ colnames(FeGenie.data.melt)[colnames(FeGenie.data.melt)=="variable"] <- "Iron_ca
 colnames(FeGenie.data.melt)[colnames(FeGenie.data.melt)=="value"] <- "Normalized_gene_abundance"
 
 # ----------------- output files
-outfile = paste(args[2], "Fegenie-dotplot.tiff", sep = "/", collapse = NULL)
-tiff(outfile, units="in", width=24, height=20, res=300)
+outfile = paste(args[2], "GeoGenie-dotplot.tiff", sep = "/", collapse = NULL)
+tiff(outfile, units="in", width=30, height=20, res=100)
 
 FeGenie.data.melt$Normalized_gene_abundance = as.character(FeGenie.data.melt$Normalized_gene_abundance)
 FeGenie.data.melt$Normalized_gene_abundance = as.numeric(FeGenie.data.melt$Normalized_gene_abundance)
 
-FeGenie.meta.plot <- ggplot(FeGenie.data.melt, aes(x = X, y = Iron_category, size = Normalized_gene_abundance), alpha=0.7) +
+FeGenie.meta.plot <- ggplot(FeGenie.data.melt, aes(x = factor(FeGenie.data.melt$X, levels=unique(FeGenie.data.melt$X)), y = Iron_category, size = (Normalized_gene_abundance)), alpha=0.9) +
   geom_point(aes(color=Iron_category)) +
-  scale_size_area(max_size = 20) +
+  scale_size_area(max_size = 40) +
   labs(x="", y="Category") +
   scale_y_discrete(labels=c("iron_aquisition-iron_uptake" = "Iron uptake", 
                             "iron_aquisition-heme_uptake" = "Heme uptake", 
@@ -55,8 +55,8 @@ FeGenie.meta.plot <- ggplot(FeGenie.data.melt, aes(x = X, y = Iron_category, siz
         panel.border = element_rect(colour="black", size=6, fill=NA),
         strip.background=element_rect(fill='white', colour='white'),
         strip.text = element_text(face="bold", size=32),
-        panel.grid.major = element_line(size = 1),
-        panel.grid.minor = element_line(size = 1),
+        panel.grid.major = element_line(size = 6),
+        panel.grid.minor = element_line(size = 6),
         axis.text = element_text(size=32, colour="black"),
         axis.title = element_text(face="bold", size=32),
         axis.text.x = element_text(vjust = 1, angle = 45, color = "black", size = 32, hjust=1),
