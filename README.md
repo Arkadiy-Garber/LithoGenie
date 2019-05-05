@@ -2,7 +2,7 @@
 
 Detailed Wiki coming soon!
 
-HMMs used in this program come from a variety of sources, including TIGRFAMS and Pfam. 25 of the HMMs used here have been created by Karthik Anantharaman (https://github.com/kanantharaman/metabolic-hmms). Some of the HMMs were designed and calubrated by your truly specifically for GeoGenie.
+HMMs used in this program come from a variety of sources, including TIGRFAMS and Pfam. 25 of the HMMs used here have been created by Karthik Anantharaman (https://github.com/kanantharaman/metabolic-hmms; link to relevant article: https://www.nature.com/articles/ncomms13219#supplementary-information). Some of the HMMs were designed and calubrated by your truly specifically for GeoGenie.
 
 ## Quickstart with conda
 gitMore clone https://github.com/Arkadiy-Garber/GeoGenie.git
