@@ -6,12 +6,17 @@ import textwrap
 import argparse
 import sys
 
-# TODO: ADD BITSCORE CUTOFF FOR EACH HMM HIT
+
+def SUM(ls):
+    count = 0
+    for i in ls:
+        count += float(i)
+    return count
 
 
 def deExt(string):
     ls = string.split(".")
-    ls2 = ls[0:len(ls)-1]
+    ls2 = ls[0:len(ls) - 1]
     outstring = "".join(ls2)
     return outstring
 
@@ -98,15 +103,15 @@ def RemoveDuplicates(ls):
 def allButTheLast(iterable, delim):
     x = ''
     length = len(iterable.split(delim))
-    for i in range(0, length-1):
+    for i in range(0, length - 1):
         x += iterable.split(delim)[i]
         x += delim
-    return x[0:len(x)-1]
+    return x[0:len(x) - 1]
 
 
 def secondToLastItem(ls):
     x = ''
-    for i in ls[0:len(ls)-1]:
+    for i in ls[0:len(ls) - 1]:
         x = i
     return x
 
@@ -250,7 +255,7 @@ parser = argparse.ArgumentParser(
                                 (( |||==| || \\ || || (( |||==| || \\ || || || || \\ 
                                  ( / |  , ||/   || ||  ( / |  , ||/   || || || ||/   
                                   -____/  \\,/  \\,/    -____/  \\,/  \\ \\ \\ \\,/  
-                                                                                                                                
+
 
     ..................,*//(###((((((//*,,...    ....                                          ...,%%%*.....,.,.,,,,,***,,,,
 ...............,//##%%%######(/*,...       .       .......*%@@&%#,....                    *@@@@@@@@&.....,......,,****,
@@ -319,33 +324,41 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-bin_dir', type=str, help="directory of bins")
 parser.add_argument('-bin_ext', type=str, help="extension for bins (do not include the period)")
-parser.add_argument('-outdir', type=str, help="output directory (will be created if does not exist)", default="genie_out")
+parser.add_argument('-outdir', type=str, help="output directory (will be created if does not exist)",
+                    default="genie_out")
 parser.add_argument('-out', type=str, help="basename of output file (default = out)", default="out")
 parser.add_argument('--contigs_source', type=str, help="are the provided contigs from a single organism (single)"
-                                                     "or are you providing this program with metagenomic/metatranscriptomic assemblies (meta)? "
-                                                     "(default=single)", default="single")
+                                                       "or are you providing this program with metagenomic/metatranscriptomic assemblies (meta)? "
+                                                       "(default=single)", default="single")
+parser.add_argument('-bams', type=str, help="a tab-delimeted file with two columns: first column has the genome or "
+                                            "metagenome file names; second column has the corresponding BAM file "
+                                            "(provide full path to the BAM file). BAM files are only required if you would like to create "
+                                            "a heatmap that summarizes the abundance of a certain gene that is based on "
+                                            "read coverage, rather than gene counts.", default="NA")
 parser.add_argument('--d', type=int, help="maximum distance between genes to be considered in a genomic \'cluster\'."
-                                         "This number should be an integer and should reflect the maximum number of "
-                                         "genes in between putative iron-related genes identified by the HMM database "
-                                         "(default=10)", default=10)
-parser.add_argument('--makeplots', type=str, help="Would you like GeoGenie to make some figures from your data? y = yes, n = no (default = n). "
-                                                 "If so, you will need to have Rscipt installed. It is a way for R to be called directly from the command line. "
-                                                 "Warning: this part of the program is currently under beta-testing, and if there are any problems running Rscript, "
-                                                 "or installing any of the required packages, you may get a bunch of error messages at the end. "
-                                                 "This will not crash the program, however, and you can still expect to "
-                                                 "see the main output (CSV files) from Genie.", default="n")
+                                          "This number should be an integer and should reflect the maximum number of "
+                                          "genes in between putative iron-related genes identified by the HMM database "
+                                          "(default=10)", default=10)
+parser.add_argument('--makeplots', type=str,
+                    help="Would you like GeoGenie to make some figures from your data? y = yes, n = no (default = n). "
+                         "If so, you will need to have Rscipt installed. It is a way for R to be called directly from the command line. "
+                         "Warning: this part of the program is currently under beta-testing, and if there are any problems running Rscript, "
+                         "or installing any of the required packages, you may get a bunch of error messages at the end. "
+                         "This will not crash the program, however, and you can still expect to "
+                         "see the main output (CSV files) from Genie.", default="n")
 
-parser.add_argument('--element', type=str, help="which element do you want to highlight in the heatmap output? [sulfur, hydrogen, "
-                                               "methane, nitrogen, oxygen, carbon-monoxide, C1compounds, carbon, urea,"
-                                               "halogenetated-compounds, arsenic, selenium, nitriles, iron, ROS, ALL] (default = ALL)", default="ALL")
+parser.add_argument('--element', type=str,
+                    help="which element do you want to highlight in the heatmap output? [sulfur, hydrogen, "
+                         "methane, nitrogen, oxygen, carbon-monoxide, C1compounds, carbon, urea,"
+                         "halogenetated-compounds, arsenic, selenium, nitriles, iron, ROS, ALL] (default = ALL)",
+                    default="ALL")
 
 parser.add_argument('--only_heat', type=str, help="subvert all other functions of this scpript and only make the"
                                                   " heatmap. Please provide the output directory using the \'-outdir\' flag; this already must "
-                                                  "contain the output summary file from a previously completed run. y = yes, n = no (default = n)", default="n")
+                                                  "contain the output summary file from a previously completed run. y = yes, n = no (default = n)",
+                    default="n")
 
 parser.add_argument('--cpu', type=int, help="number of threads to allow for hmmsearch (default = 1)", default=1)
-
-
 
 # CHECKING FOR CONDA INSTALL
 os.system("echo ${HMM_dir}/hmm-meta.txt > HMMlib.txt")
@@ -368,7 +381,6 @@ if conda == 0:
                              "installed on your system). The R scripts directory is in the same directory as the "
                              "Genie.py code", default="NA")
 
-
 args = parser.parse_args()
 
 # CHECKING ARGUMENTS AND PATHS
@@ -383,7 +395,6 @@ if conda == 0:
         print("Exiting")
         raise SystemExit
 
-
 if args.bin_dir != "NA":
     binDir = args.bin_dir + "/"
     binDirLS = os.listdir(args.bin_dir)
@@ -393,7 +404,6 @@ else:
     print("Exiting")
     raise SystemExit
 
-
 if args.bin_ext != "NA":
     print(".")
 else:
@@ -401,7 +411,6 @@ else:
           ' which files in the provided directory are fasta files that you would like analyzed.')
     print("Exiting")
     raise SystemExit
-
 
 if args.makeplots == 'y':
     if conda == 0:
@@ -413,7 +422,6 @@ if args.makeplots == 'y':
                   '(as required of you because you did not go through the conda-based installation.')
             print("Exiting")
             raise SystemExit
-
 
 if conda == 1:
     os.system("echo ${HMM_dir} > HMMlib.txt")
@@ -443,7 +451,6 @@ else:
     outDirectory = "%s" % args.outdir
     outDirectoryLS = os.listdir("%s" % args.outdir)
 
-
 # STARTING MAIN ALGORITHM
 bits = open(HMMdir + "/hmm-meta.txt", "r")
 bitDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
@@ -459,7 +466,8 @@ if args.only_heat == "n":
     count = 0
     BinDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
     out = open("%s/%s.csv" % (args.outdir, args.out), "w")
-    out.write("bin" + "," + "gene" + "," + "process" + "," + "substrate" + "," + "ORF" + "," + "evalue" + "," + "bitscore" + "," + "sequence" + "\n")
+    out.write(
+        "bin" + "," + "gene" + "," + "process" + "," + "substrate" + "," + "ORF" + "," + "evalue" + "," + "bitscore" + "," + "sequence" + "\n")
     for i in binDirLS:
         HMMdict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
         if not re.match(r'^\.', i) and i != (args.out + ".csv") and lastItem(i.split(".")) == args.bin_ext:
@@ -475,15 +483,17 @@ if args.only_heat == "n":
                 print(".")
                 print("Finding ORFs for " + i)
                 if args.contigs_source == "single":
-                    os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
+                    os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -q" % (
+                    binDir, i, binDir, i, binDir, i))
                 elif args.contigs_source == "meta":
-                    os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -p meta -q" % (binDir, i, binDir, i, binDir, i))
+                    os.system("prodigal -i %s/%s -a %s/%s-proteins.faa -o %s/%s-prodigal.out -p meta -q" % (
+                    binDir, i, binDir, i, binDir, i))
                 else:
                     print("WARNING: you did not specify whether the provided FASTA files are single genomes or "
                           "metagenome/metatranscriptome assemblies. By default, FeGenie is assuming that these are "
                           "single genomes, and running Prodigal accordingly. Just an FYI.")
-                    os.system("prodigal -i %s%s -a %s%s-proteins.faa -o %s%s-prodigal.out -q" % (binDir, i, binDir, i, binDir, i))
-
+                    os.system("prodigal -i %s%s -a %s%s-proteins.faa -o %s%s-prodigal.out -q" % (
+                    binDir, i, binDir, i, binDir, i))
 
             # print("")
             # print("analyzing " + i)
@@ -494,10 +504,10 @@ if args.only_heat == "n":
             for hmm in HMMdirLS:
                 if hmm != "hmm-meta.txt":
                     count += 1
-                    perc = (count/len(HMMdirLS))*100
+                    perc = (count / len(HMMdirLS)) * 100
                     # print(str(perc) + "%")
                     # print("%.2f" % perc + "% done")
-                    sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc+1))
+                    sys.stdout.write("analyzing " + i + ": %d%%   \r" % (perc + 1))
                     sys.stdout.flush()
                     if not re.match(r'^\.', hmm):
                         os.system("hmmsearch --cpu " + str(args.cpu) +
@@ -569,7 +579,6 @@ if args.only_heat == "n":
 
     out.close()
 
-
     summaryDict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 'EMPTY')))
     summary = open("%s/%s.csv" % (args.outdir, args.out), "r")
     for i in summary:
@@ -591,7 +600,6 @@ if args.only_heat == "n":
             summaryDict[genome][orf]["bitscore"] = bitscore
             summaryDict[genome][orf]["sequence"] = sequence
             summaryDict[genome][orf]["bitcut"] = bitcut
-
 
     # ****************************** CLUSTERING OF ORFS BASED ON GENOMIC PROXIMITY *************************************
     print("")
@@ -620,10 +628,12 @@ if args.only_heat == "n":
 
                     out.write(summaryDict[i][orf]["substrate"] + "," + summaryDict[i][orf]["process"] + "," +
                               summaryDict[i][orf]["gene"] + "," + i + "," + orf + "," + summaryDict[i][orf]["evalue"] +
-                              "," + str(summaryDict[i][orf]["bitscore"]) + "," + str(summaryDict[i][orf]["bitcut"]) + "," +
+                              "," + str(summaryDict[i][orf]["bitscore"]) + "," + str(
+                        summaryDict[i][orf]["bitcut"]) + "," +
                               str(summaryDict[i][orf]["sequence"]) + "," + str(counter) + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
                     counter += 1
 
                 else:
@@ -631,15 +641,17 @@ if args.only_heat == "n":
                         orf = j + "_" + str(l)
 
                         out.write(summaryDict[i][orf]["substrate"] + "," + summaryDict[i][orf]["process"] + "," +
-                                  summaryDict[i][orf]["gene"] + "," + i + "," + orf + "," + summaryDict[i][orf]["evalue"] +
-                                  "," + str(summaryDict[i][orf]["bitscore"]) + "," + str(summaryDict[i][orf]["bitcut"]) +
+                                  summaryDict[i][orf]["gene"] + "," + i + "," + orf + "," + summaryDict[i][orf][
+                                      "evalue"] +
+                                  "," + str(summaryDict[i][orf]["bitscore"]) + "," + str(
+                            summaryDict[i][orf]["bitcut"]) +
                                   "," + str(summaryDict[i][orf]["sequence"]) + "," + str(counter) + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
                     counter += 1
 
     out.close()
-
 
     # ****************************** FILTERING OUT LIKELY FALSE POSITIVES *************************************
     clusterDict = defaultdict(lambda: defaultdict(list))
@@ -667,19 +679,23 @@ if args.only_heat == "n":
                 else:  # If there are other genes in the cluster that are not FLEET
                     for j in clusterDict[i]["line"]:
                         if j[2] not in fleet:  # avoiding the fleet genes
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:  # if there are 5 or more of the FLEET genes present within cluster
                 for j in clusterDict[i]["line"]:
                     out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "MamA" in ls or "MamB" in ls or "MamC" in ls or "MamD" in ls or "MamE" in ls or "MamF" in ls or "MamG" in ls or "MamJ" \
                 in ls or "MamK" in ls or "MamM" in ls or "MamP" in ls or "MamW" in ls or "MamX" in ls or "MamY" in ls:
-            mam = ["MamA", "MamB", "MamC", "MamD", "MamE", "MamF", "MamG", "MamJ", "MamK", "MamM", "MamP", "MamW", "MamX", "MamY"]
+            mam = ["MamA", "MamB", "MamC", "MamD", "MamE", "MamF", "MamG", "MamJ", "MamK", "MamM", "MamP", "MamW",
+                   "MamX", "MamY"]
 
             if unique(ls, mam) < 7:
                 if len(remove2(ls, mam)) < 1:
@@ -687,37 +703,51 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in mam:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "MtoA" in ls or "MtrA" in ls or "MtrC_TIGR03507" in ls or "MtrB_TIGR03509" in ls:
             if "MtoA" in ls and "MtrB_TIGR03509" in ls:
                 for j in clusterDict[i]["line"]:
                     if j[2] in ["MtrB_TIGR03509", "MtoA"]:
-                        out.write(j[0] + "," + "iron-oxidation" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                        out.write(
+                            j[0] + "," + "iron-oxidation" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
                     else:
-                        out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                        out.write(
+                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                            j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             if "MtrA" in ls and "MtrB_TIGR03509" in ls:
                 for j in clusterDict[i]["line"]:
                     if j[2] in ["MtrA", "MtrB_TIGR03509"]:
-                        out.write(j[0] + "," + "iron-reduction" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                        out.write(
+                            j[0] + "," + "iron-reduction" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
                     else:
-                        out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                        out.write(
+                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                            j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             elif "MtrB_TIGR03509.hmm" not in ls:
                 pass
@@ -734,14 +764,16 @@ if args.only_heat == "n":
                         if j[2] not in foxabc:
                             out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
 
                 for j in clusterDict[i]["line"]:
                     out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "FoxE" in ls or "FoxY" in ls or "FoxZ" in ls:
             foxeyz = ["FoxE", "FoxY", "FoxZ"]
@@ -763,7 +795,8 @@ if args.only_heat == "n":
                 for j in clusterDict[i]["line"]:
                     out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Cyc1" in ls:
             if ("Cyc2_repCluster3" not in ls and "Cyc2_repCluster2" not in ls and "Cyc2_repCluster1" not in ls and
@@ -774,9 +807,10 @@ if args.only_heat == "n":
             if ("MtrB_TIGR03509" not in ls and "MtrA" not in ls and "MtoA" not in ls and "MtrC_TIGR03507" not in ls):
                 pass
         ############################################################################################################
-        elif "thiosulfate_oxidation_soxB" in ls or "thiosulfate_oxidation_soxY" in ls or "thiosulfate_oxidation_soxC" in ls\
+        elif "thiosulfate_oxidation_soxB" in ls or "thiosulfate_oxidation_soxY" in ls or "thiosulfate_oxidation_soxC" in ls \
                 or "soxA" in ls or "soxX" in ls or "soxZ" in ls:
-            soxabcxyz = ["thiosulfate_oxidation_soxB", "thiosulfate_oxidation_soxY", "thiosulfate_oxidation_soxC", "soxA", "soxX", "soxZ"]
+            soxabcxyz = ["thiosulfate_oxidation_soxB", "thiosulfate_oxidation_soxY", "thiosulfate_oxidation_soxC",
+                         "soxA", "soxX", "soxZ"]
 
             if unique(ls, soxabcxyz) < 3:
                 if len(remove2(ls, soxabcxyz)) < 1:
@@ -784,19 +818,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in soxabcxyz:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "anaerobic_sulfite_reductase_asrA" in ls or "anaerobic_sulfite_reductase_asrB" in ls or "anaerobic_sulfite_reductase_asrC" in ls:
-            asrabc = ["anaerobic_sulfite_reductase_asrA", "anaerobic_sulfite_reductase_asrB", "anaerobic_sulfite_reductase_asrC"]
+            asrabc = ["anaerobic_sulfite_reductase_asrA", "anaerobic_sulfite_reductase_asrB",
+                      "anaerobic_sulfite_reductase_asrC"]
 
             if unique(ls, asrabc) < 2:
                 if len(remove2(ls, asrabc)) < 1:
@@ -804,19 +843,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in asrabc:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "particulate_methane_monooxygenase_pmoA" in ls or "partiuclate_methane_monooxygenase_pmoB" in ls or "partiuclate_methane_monooxygenase_pmoC" in ls:
-            pmoabc = ["particulate_methane_monooxygenase_pmoA", "partiuclate_methane_monooxygenase_pmoB", "partiuclate_methane_monooxygenase_pmoC"]
+            pmoabc = ["particulate_methane_monooxygenase_pmoA", "partiuclate_methane_monooxygenase_pmoB",
+                      "partiuclate_methane_monooxygenase_pmoC"]
 
             if unique(ls, pmoabc) < 2:
                 if len(remove2(ls, pmoabc)) < 1:
@@ -824,16 +868,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in pmoabc:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "soluble_methane_monooxygenase_mmoB" in ls or "soluble_methane_monooxygenase_mmoD" in ls:
             mmoBD = ["soluble_methane_monooxygenase_mmoB", "soluble_methane_monooxygenase_mmoD"]
@@ -844,19 +892,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in mmoBD:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "methyl_coenzymeM_reductase_mcrA" in ls or "methyl_coenzymeM_reductase_mcrB" in ls or "methyl_coenzymeM_reductase_mcrG" in ls:
-            mcrabc = ["methyl_coenzymeM_reductase_mcrA", "methyl_coenzymeM_reductase_mcrB", "methyl_coenzymeM_reductase_mcrG"]
+            mcrabc = ["methyl_coenzymeM_reductase_mcrA", "methyl_coenzymeM_reductase_mcrB",
+                      "methyl_coenzymeM_reductase_mcrG"]
 
             if unique(ls, mcrabc) < 2:
                 if len(remove2(ls, mcrabc)) < 1:
@@ -864,16 +917,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in mcrabc:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Fe_nitrogenase_alpha" in ls or "Fe_nitrogenase_beta" in ls or "Fe_nitrogenase_delta" in ls:
             fenitrogenase = ["Fe_nitrogenase_alpha", "Fe_nitrogenase_beta", "Fe_nitrogenase_delta"]
@@ -884,16 +941,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in fenitrogenase:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "MoFe_nitrogenase_nifD" in ls or "MoFe_nitrogenase_nifK" in ls or "nitrogenase_nifH" in ls:
             mofenitrogenase = ["MoFe_nitrogenase_nifD", "MoFe_nitrogenase_nifK", "nitrogenase_nifH"]
@@ -904,19 +965,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in mofenitrogenase:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "V_containing_nitrogenase_Alpha" in ls or "V_containing_nitrogenase_Beta" in ls or "V_containing_nitrogenase_Delta" in ls:
-            vnitrogenase = ["V_containing_nitrogenase_Alpha", "V_containing_nitrogenase_Beta", "V_containing_nitrogenase_Delta"]
+            vnitrogenase = ["V_containing_nitrogenase_Alpha", "V_containing_nitrogenase_Beta",
+                            "V_containing_nitrogenase_Delta"]
 
             if unique(ls, vnitrogenase) < 2:
                 if len(remove2(ls, vnitrogenase)) < 1:
@@ -924,16 +990,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in vnitrogenase:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrite_oxidoreductase_nxrA" in ls or "nitrite_oxidoreductase_nxrB" in ls:
             nxrab = ["nitrite_oxidoreductase_nxrA", "nitrite_oxidoreductase_nxrB"]
@@ -944,16 +1014,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nxrab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrate_reductase_napA" in ls or "nitrate_reductase_napB" in ls:
             napab = ["nitrate_reductase_napA", "nitrate_reductase_napB"]
@@ -964,16 +1038,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in napab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrate_reductase_narG" in ls or "nitrate_reductase_narH" in ls:
             nargh = ["nitrate_reductase_narG", "nitrate_reductase_narH"]
@@ -984,16 +1062,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nargh:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrite_reductase_nrfH" in ls or "nitrite_reductase_nrfA" in ls or "nitrite_reductase_nrfD" in ls:
             nrfhad = ["nitrite_reductase_nrfH", "nitrite_reductase_nrfA", "nitrite_reductase_nrfD"]
@@ -1004,19 +1086,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nrfhad:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrite_reductase_nirB" in ls or "nitrite_reductase_nirD" in ls or "nitrite_reductase_nirK" in ls or "nitrite_reductase_nirS" in ls:
-            nirbdks = ["nitrite_reductase_nirB", "nitrite_reductase_nirD", "nitrite_reductase_nirK", "nitrite_reductase_nirS"]
+            nirbdks = ["nitrite_reductase_nirB", "nitrite_reductase_nirD", "nitrite_reductase_nirK",
+                       "nitrite_reductase_nirS"]
 
             if unique(ls, nirbdks) < 2:
                 if len(remove2(ls, nirbdks)) < 1:
@@ -1024,19 +1111,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nirbdks:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitrite_reductase_nirB" in ls or "nitrite_reductase_nirD" in ls or "nitrite_reductase_nirK" in ls or "nitrite_reductase_nirS" in ls:
-            nirbdks = ["nitrite_reductase_nirB", "nitrite_reductase_nirD", "nitrite_reductase_nirK", "nitrite_reductase_nirS"]
+            nirbdks = ["nitrite_reductase_nirB", "nitrite_reductase_nirD", "nitrite_reductase_nirK",
+                       "nitrite_reductase_nirS"]
 
             if unique(ls, nirbdks) < 2:
                 if len(remove2(ls, nirbdks)) < 1:
@@ -1044,16 +1136,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nirbdks:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "nitric_oxide_reductase_norB" in ls or "nitric_oxide_reductase_norC" in ls:
             norbc = ["nitric_oxide_reductase_norB", "nitric_oxide_reductase_norC"]
@@ -1064,16 +1160,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in norbc:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
 
         elif "nitrous_oxide_reductase_nosD" in ls or "nitrous_oxide_reductase_nosZ" in ls:
@@ -1085,16 +1185,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nosdz:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "CytCoxidase_aa3_coxA" in ls or "CytCoxidase_aa3_coxB" in ls:
@@ -1106,16 +1210,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in coxab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "CytCoxidase_cbb3_ccoN" in ls or "CytCoxidase_cbb3_ccoO" in ls or "CytCoxidase_cbb3_ccoP" in ls:
             cconop = ["CytCoxidase_cbb3_ccoN", "CytCoxidase_cbb3_ccoO", "CytCoxidase_cbb3_ccoP"]
@@ -1126,19 +1234,24 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in cconop:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Cyt_bo3_ubiquinol_oxidase_CyoA" in ls or "Cyt_bo3_ubiquinol_oxidase_CyoD" in ls or "Cyt_bo3_ubiquinol_oxidase_CyoE" in ls:
-            cyoade = ["Cyt_bo3_ubiquinol_oxidase_CyoA", "Cyt_bo3_ubiquinol_oxidase_CyoD", "Cyt_bo3_ubiquinol_oxidase_CyoE"]
+            cyoade = ["Cyt_bo3_ubiquinol_oxidase_CyoA", "Cyt_bo3_ubiquinol_oxidase_CyoD",
+                      "Cyt_bo3_ubiquinol_oxidase_CyoE"]
 
             if unique(ls, cyoade) < 2:
                 if len(remove2(ls, cyoade)) < 1:
@@ -1146,16 +1259,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in cyoade:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Cyt_bd_oxidase_CydA" in ls or "Cyt_bd_oxidase_CydB" in ls:
             cydab = ["Cyt_bd_oxidase_CydA", "Cyt_bd_oxidase_CydB"]
@@ -1166,16 +1283,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in cydab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "Cyt_aa3_quinol_oxidase_QoxA" in ls or "Cyt_aa3_quinol_oxidase_QoxB" in ls:
             qoxab = ["Cyt_aa3_quinol_oxidase_QoxA", "Cyt_aa3_quinol_oxidase_QoxB"]
@@ -1186,16 +1307,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in qoxab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
         ############################################################################################################
         elif "methylamine_dehydrogenase_mauA" in ls or "methylamine_dehydrogenase_mauB" in ls:
             mauab = ["methylamine_dehydrogenase_mauA", "methylamine_dehydrogenase_mauB"]
@@ -1206,16 +1331,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in mauab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "formate_dehydrogenase_alpha" in ls or "formate_dehydrogenase_beta" in ls or "formate_dehydrogenase_gamma" in ls:
@@ -1227,20 +1356,25 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in formatedehyd:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "carbon_monoxide_dehydrogenase_coxS" in ls or "carbon_monoxide_dehydrogenase_coxM" in ls or "carbon_monoxide_dehydrogenase_coxL" in ls:
-            coxsml = ["carbon_monoxide_dehydrogenase_coxS", "carbon_monoxide_dehydrogenase_coxM", "carbon_monoxide_dehydrogenase_coxL"]
+            coxsml = ["carbon_monoxide_dehydrogenase_coxS", "carbon_monoxide_dehydrogenase_coxM",
+                      "carbon_monoxide_dehydrogenase_coxL"]
 
             if unique(ls, coxsml) < 2:
                 if len(remove2(ls, coxsml)) < 1:
@@ -1248,16 +1382,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in coxsml:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
 
         ############################################################################################################
@@ -1270,16 +1408,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in codhdccat:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
 
         ############################################################################################################
@@ -1292,16 +1434,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in aclab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "urease_ureA" in ls or "urease_ureB" in ls or "urease_ureC" in ls:
@@ -1313,16 +1459,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in ureabc:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "arsenite_oxidase_small" in ls or "arsenite_oxidase_large" in ls:
@@ -1334,16 +1484,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in arsenite:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "DMSO_reductase_typeII_pcrA" in ls or "DMSO_reductase_typeII_pcrB" in ls:
@@ -1355,16 +1509,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in pcrab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "selenate_reductase_ygfM" in ls or "selenate_reductase_MoBindingSubunit" in ls or "selenate_reductase_ygfK" in ls:
@@ -1376,16 +1534,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in ygfmk:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "nitrile_hydratase_nthA" in ls or "nitrile_hydratase_nthB" in ls:
@@ -1397,16 +1559,20 @@ if args.only_heat == "n":
                 else:
                     for j in clusterDict[i]["line"]:
                         if j[2] not in nthab:
-                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                            out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
 
-                    out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                    out.write(
+                        "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
-                out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+                out.write(
+                    "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
         ############################################################################################################
         elif "adenylyl_sulfate_kinase_cysC_apsK" in ls or "Sulfate_andenyltransferase_CysN" in ls:
@@ -1419,7 +1585,8 @@ if args.only_heat == "n":
                     for j in clusterDict[i]["line"]:
                         if j[2] not in cyscn:
                             out.write(
-                                j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                                j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[
+                                    6] + "," +
                                 j[7] + "," + j[8] + "," + j[9] + "\n")
 
                     out.write(
@@ -1427,8 +1594,9 @@ if args.only_heat == "n":
 
             else:
                 for j in clusterDict[i]["line"]:
-                    out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
-                        7] + "," + j[8] + "," + j[9] + "\n")
+                    out.write(
+                        j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            7] + "," + j[8] + "," + j[9] + "\n")
 
                 out.write(
                     "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
@@ -1439,36 +1607,43 @@ if args.only_heat == "n":
                 or "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrB" in ls or "dsrK" in ls or "dsrM" in ls \
                 or "dsrE" in ls or "dsrF" in ls or "dsrH" in ls or "dsrC" in ls:
             dsr = ["dissimilatory_sulfite_reductase_DsrD", "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrA",
-                   "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrB", "dsrK", "dsrM", "dsrE", "dsrF", "dsrH", "dsrC"]
+                   "dissimilatory_sulfite_reductase-sulfur_oxidation_dsrB", "dsrK", "dsrM", "dsrE", "dsrF", "dsrH",
+                   "dsrC"]
             if unique(ls, ["dsrE", "dsrF", "dsrH"]):
                 for j in clusterDict[i]["line"]:
                     if j[2] not in dsr:
                         out.write(
-                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                            j[
                                 7] + "," + j[8] + "," + j[9] + "\n")
                     else:
                         out.write(
-                            "sulfur-oxidation" + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            "sulfur-oxidation" + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," +
+                            j[6] + "," + j[
                                 7] + "," + j[8] + "," + j[9] + "\n")
 
             else:
                 for j in clusterDict[i]["line"]:
                     if j[2] not in dsr:
                         out.write(
-                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," +
+                            j[
                                 7] + "," + j[8] + "," + j[9] + "\n")
                     else:
                         out.write(
-                            "sulfite-reduction" + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                            "sulfite-reduction" + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," +
+                            j[6] + "," + j[
                                 7] + "," + j[8] + "," + j[9] + "\n")
 
         ############################################################################################################
         else:
             linels = (clusterDict[i]["line"])
             for j in linels:
-                out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[7] + "," + j[8] + "," + j[9] + "\n")
+                out.write(j[0] + "," + j[1] + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "," + j[6] + "," + j[
+                    7] + "," + j[8] + "," + j[9] + "\n")
 
-            out.write("#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
+            out.write(
+                "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "," + "#" + "\n")
 
     out.close()
 
@@ -1522,7 +1697,7 @@ if args.only_heat == "n":
                     out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
                               memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
                               orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
-                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] + "," +
                               memoryDict[dataset][orf]["clu"] + "\n")
 
             elif memoryDict[dataset][orf]["gene"] in FLEET:
@@ -1532,14 +1707,14 @@ if args.only_heat == "n":
                     out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
                               memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
                               orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
-                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                              memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] + "," +
                               memoryDict[dataset][orf]["clu"] + "\n")
 
             else:
                 out.write(memoryDict[dataset][orf]["element"] + "," + memoryDict[dataset][orf]["cat"] + "," +
                           memoryDict[dataset][orf]["gene"] + "," + dataset + "," +
                           orf + "," + memoryDict[dataset][orf]["e"] + "," + memoryDict[dataset][orf]["bit"] + "," +
-                          memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] +
+                          memoryDict[dataset][orf]["cutoff"] + "," + memoryDict[dataset][orf]["seq"] + "," +
                           memoryDict[dataset][orf][
                               "clu"] + "\n")
     out.close()
@@ -1549,8 +1724,161 @@ if args.only_heat == "n":
     # ****************************** CREATING A HEATMAP-COMPATIBLE CSV FILE *************************************
     print("....")
     print(".....")
-    # print("Writing heatmap-compatible CSV")
-    if args.element != "ALL":
+    # COVERAGE-BASED ABUNDANCE
+    if args.bams != "NA":
+        depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+        BAMmapDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
+        BAMmap = open(args.bams)
+        for i in BAMmap:
+            string = ''
+            ls = i.rstrip().split("\t")
+            cell = ls[0]
+            for j in ls[1:]:
+                string += " "
+                string += j
+            os.system("jgi_summarize_bam_contig_depths --outputDepth %s/%s.depth%s" % (args.outdir, cell, string))
+            print("")
+            depth = open("%s/%s.depth" % (args.outdir, cell))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    print(cell)
+                    print(LS[0])
+                    print("")
+                    depthDict[cell][LS[0]] = LS[2]
+
+        if args.element == "ALL":
+            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
+                    "carbon",
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+
+            Dict = defaultdict(lambda: defaultdict(list))
+            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+            for i in final:
+                ls = (i.rstrip().split(","))
+                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                    if not re.match(r'#', i):
+                        process = ls[0]
+                        cell = ls[3]
+                        orf = ls[4]
+                        contig = allButTheLast(orf, "_")
+                        gene = ls[2]
+                        print(cell)
+                        print(contig)
+                        print("")
+                        Dict[cell][process].append(float(depthDict[cell][contig]))
+
+            outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+            outHeat.write("X" + ',')
+            for i in sorted(Dict.keys()):
+                outHeat.write(i + ",")
+            outHeat.write("\n")
+
+            for i in cats:
+                outHeat.write(i + ",")
+                for j in sorted(Dict.keys()):
+                    if not re.match(r'#', j):
+                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                outHeat.write("\n")
+
+            outHeat.close()
+
+        else:
+            elementDict = defaultdict(lambda: defaultdict(list))
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                if ls[0] != "hmm":
+                    if ls[3] == args.element:
+                        elementDict[ls[3]][ls[2]].append(ls[0])
+
+            catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+            for i in elementDict.keys():
+                for j in elementDict[i]:
+                    for k in elementDict[i][j]:
+                        catDict[k] = j
+
+            Dict = defaultdict(lambda: defaultdict(list))
+            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+            for i in final:
+                ls = (i.rstrip().split(","))
+                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                    if not re.match(r'#', i):
+                        element = ls[0]
+                        cell = ls[3]
+                        orf = ls[4]
+                        contig = allButTheLast(orf, "_")
+                        gene = ls[2]
+                        reaction = ls[1]
+                        Dict[cell][gene].append(float(depthDict[cell][contig]))
+
+            cats = []
+            CatOrgDict = defaultdict(list)
+            for i in Dict.keys():
+                for j in Dict[i]:
+                    if len(catDict[j]) > 0:
+                        if j not in cats:
+                            cats.append(j)
+                            CatOrgDict[catDict[j]].append(j)
+
+            outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+            outHeat.write("X" + ',')
+            for i in sorted(Dict.keys()):
+                outHeat.write(i + ",")
+            outHeat.write("\n")
+
+            for i in CatOrgDict.keys():
+                for j in CatOrgDict[i]:
+                    outHeat.write(i + "--" + j + ",")
+                    for k in sorted(Dict.keys()):
+                        outHeat.write(str(SUM(Dict[k][j])) + ",")
+                    outHeat.write("\n")
+
+            outHeat.close()
+
+    # GENE COUNTS-BASED ABUNDANCE
+    if args.element == "ALL":
+        cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
+                "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+
+        Dict = defaultdict(lambda: defaultdict(list))
+        final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+        for i in final:
+            ls = (i.rstrip().split(","))
+            if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                if not re.match(r'#', i):
+                    process = ls[0]
+                    cell = ls[3]
+                    orf = ls[4]
+                    gene = ls[2]
+                    Dict[cell][process].append(gene)
+
+        normDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+        for i in os.listdir(args.bin_dir):
+            if lastItem(i.split(".")) == args.bin_ext:
+                file = open("%s/%s-proteins.faa" % (args.bin_dir, i), "r")
+                file = fasta(file)
+                normDict[i] = len(file.keys())
+
+        outHeat = open("%s/%s.%s.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+        outHeat.write("X" + ',')
+        for i in sorted(Dict.keys()):
+            outHeat.write(i + ",")
+        outHeat.write("\n")
+
+        for i in cats:
+            outHeat.write(i + ",")
+            for j in sorted(Dict.keys()):
+                if not re.match(r'#', j):
+                    outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
+            outHeat.write("\n")
+        outHeat.close()
+
+        print('......')
+        print(".......")
+        print("Finished!")
+
+    else:
         elementDict = defaultdict(lambda: defaultdict(list))
         bits = open(HMMdir + "/hmm-meta.txt", "r")
         for i in bits:
@@ -1564,7 +1892,6 @@ if args.only_heat == "n":
             for j in elementDict[i]:
                 for k in elementDict[i][j]:
                     catDict[k] = j
-
 
         Dict = defaultdict(lambda: defaultdict(list))
         final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1613,7 +1940,119 @@ if args.only_heat == "n":
         print('......')
         print(".......")
         print("Finished!")
-    else:
+
+
+else:
+    print("....")
+    print(".....")
+    # COVERAGE-BASED ABUNDANCE
+    if args.bams != "NA":
+        depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+        BAMmapDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
+        BAMmap = open(args.bams)
+        for i in BAMmap:
+            string = ''
+            ls = i.rstrip().split("\t")
+            cell = ls[0]
+            for j in ls[1:]:
+                string += " "
+                string += j
+            os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
+            print("")
+            depth = open("%s/%s.depth" % (args.outdir, cell))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    depthDict[cell][LS[0]] = LS[2]
+
+        if args.element == "ALL":
+            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
+                    "carbon",
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+
+            Dict = defaultdict(lambda: defaultdict(list))
+            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+            for i in final:
+                ls = (i.rstrip().split(","))
+                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                    if not re.match(r'#', i):
+                        process = ls[0]
+                        cell = ls[3]
+                        orf = ls[4]
+                        contig = allButTheLast(orf, "_")
+                        gene = ls[2]
+                        Dict[cell][process].append(float(depthDict[cell][contig]))
+
+            outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+            outHeat.write("X" + ',')
+            for i in sorted(Dict.keys()):
+                outHeat.write(i + ",")
+            outHeat.write("\n")
+
+            for i in cats:
+                outHeat.write(i + ",")
+                for j in sorted(Dict.keys()):
+                    if not re.match(r'#', j):
+                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                outHeat.write("\n")
+
+            outHeat.close()
+
+        else:
+            elementDict = defaultdict(lambda: defaultdict(list))
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                if ls[0] != "hmm":
+                    if ls[3] == args.element:
+                        elementDict[ls[3]][ls[2]].append(ls[0])
+
+            catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+            for i in elementDict.keys():
+                for j in elementDict[i]:
+                    for k in elementDict[i][j]:
+                        catDict[k] = j
+
+            Dict = defaultdict(lambda: defaultdict(list))
+            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+            for i in final:
+                ls = (i.rstrip().split(","))
+                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                    if not re.match(r'#', i):
+                        element = ls[0]
+                        cell = ls[3]
+                        orf = ls[4]
+                        contig = allButTheLast(orf, "_")
+                        gene = ls[2]
+                        reaction = ls[1]
+                        Dict[cell][gene].append(float(depthDict[cell][contig]))
+
+            cats = []
+            CatOrgDict = defaultdict(list)
+            for i in Dict.keys():
+                for j in Dict[i]:
+                    if len(catDict[j]) > 0:
+                        if j not in cats:
+                            cats.append(j)
+                            CatOrgDict[catDict[j]].append(j)
+
+            outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+            outHeat.write("X" + ',')
+            for i in sorted(Dict.keys()):
+                outHeat.write(i + ",")
+            outHeat.write("\n")
+
+            for i in CatOrgDict.keys():
+                for j in CatOrgDict[i]:
+                    outHeat.write(i + "--" + j + ",")
+                    for k in sorted(Dict.keys()):
+                        outHeat.write(str(SUM(Dict[k][j])) + ",")
+                    outHeat.write("\n")
+
+            outHeat.close()
+
+    # GENE COUNTS-BASED ABUNDANCE
+    if args.element == "ALL":
         cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
                 "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
 
@@ -1648,13 +2087,13 @@ if args.only_heat == "n":
                 if not re.match(r'#', j):
                     outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
             outHeat.write("\n")
-
         outHeat.close()
+
         print('......')
         print(".......")
         print("Finished!")
-else:
-    if args.element != "ALL":
+
+    else:
         elementDict = defaultdict(lambda: defaultdict(list))
         bits = open(HMMdir + "/hmm-meta.txt", "r")
         for i in bits:
@@ -1705,7 +2144,7 @@ else:
         outHeat.write("\n")
 
         for i in CatOrgDict.keys():
-            for j in sorted(CatOrgDict[i]):
+            for j in CatOrgDict[i]:
                 outHeat.write(i + "--" + j + ",")
                 for k in sorted(Dict.keys()):
                     if not re.match(r'#', j):
@@ -1713,45 +2152,9 @@ else:
                 outHeat.write("\n")
 
         outHeat.close()
-    else:
-        # print("Writing heatmap-compatible CSV")
-        cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-                "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
-
-        Dict = defaultdict(lambda: defaultdict(list))
-        final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
-        for i in final:
-            ls = (i.rstrip().split(","))
-            if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
-                if not re.match(r'#', i):
-                    process = ls[0]
-                    cell = ls[3]
-                    orf = ls[4]
-                    gene = ls[2]
-                    Dict[cell][process].append(gene)
-
-        normDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
-        for i in os.listdir(args.bin_dir):
-            if lastItem(i.split(".")) == args.bin_ext:
-                file = open("%s/%s-proteins.faa" % (args.bin_dir, i), "r")
-                file = fasta(file)
-                normDict[i] = len(file.keys())
-
-        outHeat = open("%s/%s.%s.heatmap.csv" % (args.outdir, args.out, args.element), "w")
-        outHeat.write("X" + ',')
-        for i in sorted(Dict.keys()):
-            outHeat.write(i + ",")
-        outHeat.write("\n")
-
-        for i in cats:
-            outHeat.write(i + ",")
-            for j in sorted(Dict.keys()):
-                if not re.match(r'#', j):
-                    outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
-            outHeat.write("\n")
-
-        outHeat.close()
-
+        print('......')
+        print(".......")
+        print("Finished!")
 
 # ******** RUNNING RSCRIPT TO GENERATE PLOTS **************
 if args.makeplots == "y":
@@ -1764,7 +2167,7 @@ if args.makeplots == "y":
             Rdir = (i.rstrip())
         os.system("rm r.txt")
 
-    os.system("Rscript --vanilla %s/DotPlot.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
-    os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.%s.heatmap.csv %s" % (Rdir, args.outdir, args.out, args.element, args.outdir))
-
-
+    os.system("Rscript --vanilla %s/DotPlot.R %s/%s.%s.heatmap.csv %s" % (
+    Rdir, args.outdir, args.out, args.element, args.outdir))
+    os.system("Rscript --vanilla %s/dendro-heatmap.R %s/%s.%s.heatmap.csv %s" % (
+    Rdir, args.outdir, args.out, args.element, args.outdir))
