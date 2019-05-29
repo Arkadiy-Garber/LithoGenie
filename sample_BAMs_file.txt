@@ -1,0 +1,4 @@
+GenomeA.fasta	/path/to/GenomeA.sorted.bam
+GenomeB.fasta	/path/to/GenomeB.sorted.bam
+GenomeC.fasta	/path/to/GenomeC.sorted.bam
+GenomeD.fasta	/path/to/GenomeD.sorted.bam
