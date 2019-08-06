@@ -1681,13 +1681,21 @@ if args.only_heat == "n":
             for j in ls[1:]:
                 string += " "
                 string += j
-            os.system("jgi_summarize_bam_contig_depths --outputDepth %s/%s.depth%s" % (args.outdir, cell, string))
-            print("")
-            depth = open("%s/%s.depth" % (args.outdir, cell))
-            for k in depth:
-                LS = k.rstrip().split("\t")
-                if LS[0] != "contigName":
-                    depthDict[cell][LS[0]] = LS[2]
+            try:
+                depth = open("%s/%s.depth" % (args.outdir, cell))
+                for k in depth:
+                    LS = k.rstrip().split("\t")
+                    if LS[0] != "contigName":
+                        depthDict[cell][LS[0]] = LS[2]
+
+            except FileNotFoundError:
+                os.system("jgi_summarize_bam_contig_depths --outputDepth %s/%s.depth%s" % (args.outdir, cell, string))
+                print("processing... " + cell)
+                depth = open("%s/%s.depth" % (args.outdir, cell))
+                for k in depth:
+                    LS = k.rstrip().split("\t")
+                    if LS[0] != "contigName":
+                        depthDict[cell][LS[0]] = LS[2]
 
         os.system("mkdir %s/contigDepths" % args.outdir)
         os.system("mv %s/*depth %s/contigDepths/" % (args.outdir, args.outdir))
@@ -1782,12 +1790,20 @@ if args.only_heat == "n":
     elif args.bam != "NA":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
 
-        os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
-        depth = open("%s.depth" % (args.bam))
-        for k in depth:
-            LS = k.rstrip().split("\t")
-            if LS[0] != "contigName":
-                depthDict[LS[0]] = LS[2]
+        try:
+            depth = open("%s.depth" % (args.bam))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    depthDict[LS[0]] = LS[2]
+
+        except FileNotFoundError:
+            os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
+            depth = open("%s.depth" % (args.bam))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    depthDict[LS[0]] = LS[2]
 
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
@@ -1889,7 +1905,6 @@ if args.only_heat == "n":
             else:
                 print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
                       "try again by choosing another element, or checking your spelling.")
-
 
     # GENE COUNTS-BASED ABUNDANCE
     else:
@@ -2013,13 +2028,23 @@ else:
             for j in ls[1:]:
                 string += " "
                 string += j
-            os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
-            print("processing... " + cell)
-            depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
-            for k in depth:
-                LS = k.rstrip().split("\t")
-                if LS[0] != "contigName":
-                    depthDict[cell][LS[0]] = LS[2]
+
+            try:
+                print("processing... " + cell)
+                depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
+                for k in depth:
+                    LS = k.rstrip().split("\t")
+                    if LS[0] != "contigName":
+                        depthDict[cell][LS[0]] = LS[2]
+
+            except FileNotFoundError:
+                os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
+                print("processing... " + cell)
+                depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
+                for k in depth:
+                    LS = k.rstrip().split("\t")
+                    if LS[0] != "contigName":
+                        depthDict[cell][LS[0]] = LS[2]
 
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
@@ -2126,12 +2151,20 @@ else:
     elif args.bam != "NA":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
 
-        os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
-        depth = open("%s/%s.depth" % (args.outdir, args.bam))
-        for k in depth:
-            LS = k.rstrip().split("\t")
-            if LS[0] != "contigName":
-                depthDict[LS[0]] = LS[2]
+        try:
+            depth = open("%s.depth" % (args.bam))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    depthDict[LS[0]] = LS[2]
+
+        except FileNotFoundError:
+            os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
+            depth = open("%s.depth" % (args.bam))
+            for k in depth:
+                LS = k.rstrip().split("\t")
+                if LS[0] != "contigName":
+                    depthDict[LS[0]] = LS[2]
 
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
