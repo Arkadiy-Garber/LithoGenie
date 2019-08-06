@@ -1783,7 +1783,7 @@ if args.only_heat == "n":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
 
         os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
-        depth = open("%s/%s.depth" % (args.outdir, args.bam))
+        depth = open("%s.depth" % (args.bam))
         for k in depth:
             LS = k.rstrip().split("\t")
             if LS[0] != "contigName":
