@@ -227,7 +227,7 @@ def delim(line):
 
 
 parser = argparse.ArgumentParser(
-    prog="GeoGenie.py",
+    prog="LithoGenie.py",
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''
     *******************************************************
@@ -236,13 +236,6 @@ parser = argparse.ArgumentParser(
     University of Southern California, Earth Sciences
     Please send comments and inquiries to arkadiyg@usc.edu
 
-                                    __ ,                  __ ,                       
-                                  ,-| ~                 ,-| ~                        
-                                 ('||/__,              ('||/__,              '       
-                                (( |||  |  _-_   /'\\ (( |||  |  _-_  \\/\\ \\  _-_  
-                                (( |||==| || \\ || || (( |||==| || \\ || || || || \\ 
-                                 ( / |  , ||/   || ||  ( / |  , ||/   || || || ||/   
-                                  -____/  \\,/  \\,/    -____/  \\,/  \\ \\ \\ \\,/  
 
 ...............**/((#((((((/**,..    ...                                   ..,(##,.......,,,,***,,,
 ...........,*/(%%&%####((*,..             .....,/%@@&%#*....              ,&&@@@@@&(....,.....,***,
@@ -307,17 +300,28 @@ parser.add_argument('-out', type=str, help="basename of output file (default = o
 parser.add_argument('--contigs_source', type=str, help="are the provided contigs from a single organism (single)"
                                                        "or are you providing this program with metagenomic/metatranscriptomic assemblies (meta)? "
                                                        "(default=single)", default="single")
-parser.add_argument('-bams', type=str, help="a tab-delimeted file with two columns: first column has the genome or "
+parser.add_argument('-bams', type=str, help="a tab-delimited file with two columns: first column has the genome or "
                                             "metagenome file names; second column has the corresponding BAM file "
-                                            "(provide full path to the BAM file). BAM files are only required if you would like to create "
+                                            "(provide full path to the BAM file). Use this option if you have genomes "
+                                            "that each have different BAM files associated with them. If you have a set "
+                                            "of bins from a single metagenome sample and, thus, have only one BAM file, "
+                                            " then use the \'-bam\' option. BAM files are only required if you would like to create "
                                             "a heatmap that summarizes the abundance of a certain gene that is based on "
                                             "read coverage, rather than gene counts.", default="NA")
+
+parser.add_argument('-bam', type=str, help="BAM file. This option is only required if you would like to create "
+                                            "a heatmap that summarizes the abundance of a certain gene that is based on "
+                                            "read coverage, rather than gene counts. If you have more than one BAM file"
+                                           "corresponding to different genomes that you are providing, then use the \'-bams\' "
+                                           "option to provide a tab-delimited file that denotes which BAM file (or files) belongs "
+                                           "with which genome", default="NA")
+
 parser.add_argument('--d', type=int, help="maximum distance between genes to be considered in a genomic \'cluster\'."
                                           "This number should be an integer and should reflect the maximum number of "
                                           "genes in between putative iron-related genes identified by the HMM database "
-                                          "(default=10)", default=10)
+                                          "(default=3)", default=3)
 parser.add_argument('--makeplots', type=str,
-                    help="Would you like GeoGenie to make some figures from your data? y = yes, n = no (default = n). "
+                    help="Would you like LithoGenie to make some figures from your data? y = yes, n = no (default = n). "
                          "If so, you will need to have Rscipt installed. It is a way for R to be called directly from the command line. "
                          "Warning: this part of the program is currently under beta-testing, and if there are any problems running Rscript, "
                          "or installing any of the required packages, you may get a bunch of error messages at the end. "
@@ -394,7 +398,7 @@ if args.makeplots == 'y':
         if args.R != "NA":
             print(".")
         else:
-            print('Looks like you told GeoGenie to automatically generate R plots. '
+            print('Looks like you told LithoGenie to automatically generate R plots. '
                   'However, you have not provided the location of the directory that contains the R scripts '
                   '(as required of you because you did not go through the conda-based installation.')
             print("Exiting")
@@ -1774,6 +1778,119 @@ if args.only_heat == "n":
 
             outHeat.close()
 
+    # COVERAGE-BASED ABUNDANCE USING ONLY ONE BAM FILE
+    elif args.bam != "NA":
+        depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+
+        os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
+        depth = open("%s/%s.depth" % (args.outdir, args.bam))
+        for k in depth:
+            LS = k.rstrip().split("\t")
+            if LS[0] != "contigName":
+                depthDict[LS[0]] = LS[2]
+
+        if args.element == "ALL":
+            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
+                    "carbon",
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+
+            Dict = defaultdict(lambda: defaultdict(list))
+            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+            for i in final:
+                ls = (i.rstrip().split(","))
+                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                    if not re.match(r'#', i):
+                        process = ls[0]
+                        cell = ls[3]
+                        orf = ls[4]
+                        contig = allButTheLast(orf, "_")
+                        gene = ls[2]
+                        Dict[cell][process].append(float(depthDict[contig]))
+
+            outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+            outHeat.write("X" + ',')
+            for i in sorted(Dict.keys()):
+                outHeat.write(i + ",")
+            outHeat.write("\n")
+
+            for i in cats:
+                outHeat.write(i + ",")
+                for j in sorted(Dict.keys()):
+                    if not re.match(r'#', j):
+                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                outHeat.write("\n")
+
+            outHeat.close()
+            print('......')
+            print(".......")
+            print("Finished!")
+
+        else:
+            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
+                        "carbon-monoxide", "C1compounds", "carbon",
+                        "urea", "halogenetated-compounds", "arsenic", "selenium",
+                        "nitriles", "iron", "ROS"]
+            if args.element in elements:
+                elementDict = defaultdict(lambda: defaultdict(list))
+                bits = open(HMMdir + "/hmm-meta.txt", "r")
+                for i in bits:
+                    ls = (i.rstrip().split("\t"))
+                    if ls[0] != "hmm":
+                        if ls[3] == args.element:
+                            elementDict[ls[3]][ls[2]].append(ls[0])
+
+                catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+                for i in elementDict.keys():
+                    for j in elementDict[i]:
+                        for k in elementDict[i][j]:
+                            catDict[k] = j
+
+                Dict = defaultdict(lambda: defaultdict(list))
+                final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+                for i in final:
+                    ls = (i.rstrip().split(","))
+                    if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                        if not re.match(r'#', i):
+                            element = ls[0]
+                            cell = ls[3]
+                            orf = ls[4]
+                            contig = allButTheLast(orf, "_")
+                            gene = ls[2]
+                            reaction = ls[1]
+                            Dict[cell][gene].append(float(depthDict[contig]))
+
+                cats = []
+                CatOrgDict = defaultdict(list)
+                for i in Dict.keys():
+                    for j in Dict[i]:
+                        if len(catDict[j]) > 0:
+                            if j not in cats:
+                                cats.append(j)
+                                CatOrgDict[catDict[j]].append(j)
+
+                outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+                outHeat.write("X" + ',')
+                for i in sorted(Dict.keys()):
+                    outHeat.write(i + ",")
+                outHeat.write("\n")
+
+                for i in CatOrgDict.keys():
+                    for j in CatOrgDict[i]:
+                        outHeat.write(i + "--" + j + ",")
+                        for k in sorted(Dict.keys()):
+                            outHeat.write(str(SUM(Dict[k][j])) + ",")
+                        outHeat.write("\n")
+
+                outHeat.close()
+                print('......')
+                print(".......")
+                print("Finished!")
+
+            else:
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                      "try again by choosing another element, or checking your spelling.")
+
+
     # GENE COUNTS-BASED ABUNDANCE
     else:
         if args.element == "ALL":
@@ -1875,7 +1992,6 @@ if args.only_heat == "n":
                             outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
                     outHeat.write("\n")
 
-
             outHeat.close()
             print('......')
             print(".......")
@@ -1897,7 +2013,7 @@ else:
             for j in ls[1:]:
                 string += " "
                 string += j
-            # os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
+            os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
             print("processing... " + cell)
             depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
             for k in depth:
@@ -1937,21 +2053,90 @@ else:
                 outHeat.write("\n")
 
             outHeat.close()
+            print('......')
+            print(".......")
+            print("Finished!")
 
         else:
-            elementDict = defaultdict(lambda: defaultdict(list))
-            bits = open(HMMdir + "/hmm-meta.txt", "r")
-            for i in bits:
-                ls = (i.rstrip().split("\t"))
-                if ls[0] != "hmm":
-                    if ls[3] == args.element:
-                        elementDict[ls[3]][ls[2]].append(ls[0])
+            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
+                        "carbon-monoxide", "C1compounds", "carbon",
+                        "urea", "halogenetated-compounds", "arsenic", "selenium",
+                        "nitriles", "iron", "ROS"]
+            if args.element in elements:
+                elementDict = defaultdict(lambda: defaultdict(list))
+                bits = open(HMMdir + "/hmm-meta.txt", "r")
+                for i in bits:
+                    ls = (i.rstrip().split("\t"))
+                    if ls[0] != "hmm":
+                        if ls[3] == args.element:
+                            elementDict[ls[3]][ls[2]].append(ls[0])
 
-            catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
-            for i in elementDict.keys():
-                for j in elementDict[i]:
-                    for k in elementDict[i][j]:
-                        catDict[k] = j
+                catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+                for i in elementDict.keys():
+                    for j in elementDict[i]:
+                        for k in elementDict[i][j]:
+                            catDict[k] = j
+
+                Dict = defaultdict(lambda: defaultdict(list))
+                final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+                for i in final:
+                    ls = (i.rstrip().split(","))
+                    if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                        if not re.match(r'#', i):
+                            element = ls[0]
+                            cell = ls[3]
+                            orf = ls[4]
+                            contig = allButTheLast(orf, "_")
+                            gene = ls[2]
+                            reaction = ls[1]
+                            Dict[cell][gene].append(float(depthDict[cell][contig]))
+
+                cats = []
+                CatOrgDict = defaultdict(list)
+                for i in Dict.keys():
+                    for j in Dict[i]:
+                        if len(catDict[j]) > 0:
+                            if j not in cats:
+                                cats.append(j)
+                                CatOrgDict[catDict[j]].append(j)
+
+                outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+                outHeat.write("X" + ',')
+                for i in sorted(Dict.keys()):
+                    outHeat.write(i + ",")
+                outHeat.write("\n")
+
+                for i in CatOrgDict.keys():
+                    for j in CatOrgDict[i]:
+                        outHeat.write(i + "--" + j + ",")
+                        for k in sorted(Dict.keys()):
+                            outHeat.write(str(SUM(Dict[k][j])) + ",")
+                        outHeat.write("\n")
+
+                outHeat.close()
+                print('......')
+                print(".......")
+                print("Finished!")
+
+            else:
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                      "try again by choosing another element, or checking your spelling.")
+
+    # COVERAGE-BASED ABUNDANCE USING ONLY ONE BAM FILE
+    elif args.bam != "NA":
+        depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+
+        os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
+        depth = open("%s/%s.depth" % (args.outdir, args.bam))
+        for k in depth:
+            LS = k.rstrip().split("\t")
+            if LS[0] != "contigName":
+                depthDict[LS[0]] = LS[2]
+
+        if args.element == "ALL":
+            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
+                    "carbon",
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1959,22 +2144,12 @@ else:
                 ls = (i.rstrip().split(","))
                 if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
                     if not re.match(r'#', i):
-                        element = ls[0]
+                        process = ls[0]
                         cell = ls[3]
                         orf = ls[4]
                         contig = allButTheLast(orf, "_")
                         gene = ls[2]
-                        reaction = ls[1]
-                        Dict[cell][gene].append(float(depthDict[cell][contig]))
-
-            cats = []
-            CatOrgDict = defaultdict(list)
-            for i in Dict.keys():
-                for j in Dict[i]:
-                    if len(catDict[j]) > 0:
-                        if j not in cats:
-                            cats.append(j)
-                            CatOrgDict[catDict[j]].append(j)
+                        Dict[cell][process].append(float(depthDict[contig]))
 
             outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
             outHeat.write("X" + ',')
@@ -1982,14 +2157,82 @@ else:
                 outHeat.write(i + ",")
             outHeat.write("\n")
 
-            for i in CatOrgDict.keys():
-                for j in CatOrgDict[i]:
-                    outHeat.write(i + "--" + j + ",")
-                    for k in sorted(Dict.keys()):
-                        outHeat.write(str(SUM(Dict[k][j])) + ",")
-                    outHeat.write("\n")
+            for i in cats:
+                outHeat.write(i + ",")
+                for j in sorted(Dict.keys()):
+                    if not re.match(r'#', j):
+                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                outHeat.write("\n")
 
             outHeat.close()
+            print('......')
+            print(".......")
+            print("Finished!")
+
+        else:
+            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
+                        "carbon-monoxide", "C1compounds", "carbon",
+                        "urea", "halogenetated-compounds", "arsenic", "selenium",
+                        "nitriles", "iron", "ROS"]
+            if args.element in elements:
+                elementDict = defaultdict(lambda: defaultdict(list))
+                bits = open(HMMdir + "/hmm-meta.txt", "r")
+                for i in bits:
+                    ls = (i.rstrip().split("\t"))
+                    if ls[0] != "hmm":
+                        if ls[3] == args.element:
+                            elementDict[ls[3]][ls[2]].append(ls[0])
+
+                catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+                for i in elementDict.keys():
+                    for j in elementDict[i]:
+                        for k in elementDict[i][j]:
+                            catDict[k] = j
+
+                Dict = defaultdict(lambda: defaultdict(list))
+                final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+                for i in final:
+                    ls = (i.rstrip().split(","))
+                    if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                        if not re.match(r'#', i):
+                            element = ls[0]
+                            cell = ls[3]
+                            orf = ls[4]
+                            contig = allButTheLast(orf, "_")
+                            gene = ls[2]
+                            reaction = ls[1]
+                            Dict[cell][gene].append(float(depthDict[contig]))
+
+                cats = []
+                CatOrgDict = defaultdict(list)
+                for i in Dict.keys():
+                    for j in Dict[i]:
+                        if len(catDict[j]) > 0:
+                            if j not in cats:
+                                cats.append(j)
+                                CatOrgDict[catDict[j]].append(j)
+
+                outHeat = open("%s/%s.%s.readDepth.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+                outHeat.write("X" + ',')
+                for i in sorted(Dict.keys()):
+                    outHeat.write(i + ",")
+                outHeat.write("\n")
+
+                for i in CatOrgDict.keys():
+                    for j in CatOrgDict[i]:
+                        outHeat.write(i + "--" + j + ",")
+                        for k in sorted(Dict.keys()):
+                            outHeat.write(str(SUM(Dict[k][j])) + ",")
+                        outHeat.write("\n")
+
+                outHeat.close()
+                print('......')
+                print(".......")
+                print("Finished!")
+
+            else:
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                      "try again by choosing another element, or checking your spelling.")
 
     # GENE COUNTS-BASED ABUNDANCE
     else:
@@ -2035,67 +2278,75 @@ else:
             print("Finished!")
 
         else:
-            elementDict = defaultdict(lambda: defaultdict(list))
-            bits = open(HMMdir + "/hmm-meta.txt", "r")
-            for i in bits:
-                ls = (i.rstrip().split("\t"))
-                if ls[0] != "hmm":
-                    if ls[3] == args.element:
-                        elementDict[ls[3]][ls[2]].append(ls[0])
+            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
+                        "carbon-monoxide", "C1compounds", "carbon",
+                        "urea", "halogenetated-compounds", "arsenic", "selenium",
+                        "nitriles", "iron", "ROS"]
+            if args.element in elements:
+                elementDict = defaultdict(lambda: defaultdict(list))
+                bits = open(HMMdir + "/hmm-meta.txt", "r")
+                for i in bits:
+                    ls = (i.rstrip().split("\t"))
+                    if ls[0] != "hmm":
+                        if ls[3] == args.element:
+                            elementDict[ls[3]][ls[2]].append(ls[0])
 
-            catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
-            for i in elementDict.keys():
-                for j in elementDict[i]:
-                    for k in elementDict[i][j]:
-                        catDict[k] = j
+                catDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+                for i in elementDict.keys():
+                    for j in elementDict[i]:
+                        for k in elementDict[i][j]:
+                            catDict[k] = j
 
-            Dict = defaultdict(lambda: defaultdict(list))
-            final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
-            for i in final:
-                ls = (i.rstrip().split(","))
-                if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
-                    if not re.match(r'#', i):
-                        element = ls[0]
-                        cell = ls[3]
-                        orf = ls[4]
-                        gene = ls[2]
-                        reaction = ls[1]
-                        Dict[cell][gene].append(orf)
+                Dict = defaultdict(lambda: defaultdict(list))
+                final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
+                for i in final:
+                    ls = (i.rstrip().split(","))
+                    if ls[0] != "" and ls[1] != "assembly" and ls[1] != "genome":
+                        if not re.match(r'#', i):
+                            element = ls[0]
+                            cell = ls[3]
+                            orf = ls[4]
+                            gene = ls[2]
+                            reaction = ls[1]
+                            Dict[cell][gene].append(orf)
 
-            cats = []
-            CatOrgDict = defaultdict(list)
-            for i in Dict.keys():
-                for j in Dict[i]:
-                    if len(catDict[j]) > 0:
-                        if j not in cats:
-                            cats.append(j)
-                            CatOrgDict[catDict[j]].append(j)
+                cats = []
+                CatOrgDict = defaultdict(list)
+                for i in Dict.keys():
+                    for j in Dict[i]:
+                        if len(catDict[j]) > 0:
+                            if j not in cats:
+                                cats.append(j)
+                                CatOrgDict[catDict[j]].append(j)
 
-            normDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
-            for i in binDirLS:
-                if lastItem(i.split(".")) == args.bin_ext:
-                    file = open("%s/%s-proteins.faa" % (binDir, i), "r")
-                    file = fasta(file)
-                    normDict[i] = len(file.keys())
+                normDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
+                for i in binDirLS:
+                    if lastItem(i.split(".")) == args.bin_ext:
+                        file = open("%s/%s-proteins.faa" % (binDir, i), "r")
+                        file = fasta(file)
+                        normDict[i] = len(file.keys())
 
-            outHeat = open("%s/%s.%s.heatmap.csv" % (args.outdir, args.out, args.element), "w")
-            outHeat.write("X" + ',')
-            for i in sorted(Dict.keys()):
-                outHeat.write(i + ",")
-            outHeat.write("\n")
+                outHeat = open("%s/%s.%s.heatmap.csv" % (args.outdir, args.out, args.element), "w")
+                outHeat.write("X" + ',')
+                for i in sorted(Dict.keys()):
+                    outHeat.write(i + ",")
+                outHeat.write("\n")
 
-            for i in CatOrgDict.keys():
-                for j in CatOrgDict[i]:
-                    outHeat.write(i + "--" + j + ",")
-                    for k in sorted(Dict.keys()):
-                        if not re.match(r'#', j):
-                            outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
-                    outHeat.write("\n")
+                for i in CatOrgDict.keys():
+                    for j in CatOrgDict[i]:
+                        outHeat.write(i + "--" + j + ",")
+                        for k in sorted(Dict.keys()):
+                            if not re.match(r'#', j):
+                                outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
+                        outHeat.write("\n")
 
-            outHeat.close()
-            print('......')
-            print(".......")
-            print("Finished!")
+                outHeat.close()
+                print('......')
+                print(".......")
+                print("Finished!")
+            else:
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                      "try again by choosing another element, or checking your spelling.")
 
 # ******** RUNNING RSCRIPT TO GENERATE PLOTS **************
 if args.makeplots == "y":
