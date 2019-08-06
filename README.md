@@ -1,4 +1,4 @@
-# GeoGenie
+# LithoGenie
 
 Detailed Wiki coming soon!
 
