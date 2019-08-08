@@ -58,24 +58,24 @@ Make sure to include the location of the hmm library used by GeoGenie if you did
 
     ./LithoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/
     
-Example usage if you already ran LithoGenie, and would like to generate new heatmaps and plots for a specific element or class of molecules (in this case, iron):
+# Example usage if you already ran LithoGenie, and would like to generate new heatmaps and plots for a specific element or class of molecules (in this case, iron):
 
     ./LithoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename --makeplots y --heat_only y --element iron
     
-or if you are interested in seeing the breakdown of methane oxidation genes:
+# or if you are interested in seeing the breakdown of methane oxidation genes:
 
     ./LithoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename --makeplots y --heat_only y --element methane
     
 make sure that you provide all the same parameters and locations that you did when you initially ran the LithoGenie, and it will write the new output files to the same output directory.
     
     
-Example usage of you would like to incorporate read coverage information into the heatmap output (rather than the default gene counts)
+# Example usage of you would like to incorporate read coverage information into the heatmap output (rather than the default gene counts)
 
     ./LithoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/ -bams MyBamMapFile.txt
     
 See 'sample_BAMs_file.txt' that is in the main GeoGenie repository for the format that this file should be in!
 
-If you have a single metagenome samples from which you binned genomes, you can provide the one BAM file via the '-bam' option:
+# If you have a single metagenome samples from which you binned genomes, you can provide the one BAM file via the '-bam' option:
 
     ./LithoGenie.py -bin_dir /your/bin/directory -bin_ext faa -outdir geogenie_outdir -out ouputBasename -hmm_dir HMMs/ -bam MyMetagenomeAssembly.sorted.bam
 
