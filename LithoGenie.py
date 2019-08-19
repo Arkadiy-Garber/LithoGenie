@@ -331,7 +331,7 @@ parser.add_argument('--makeplots', type=str,
 parser.add_argument('--element', type=str,
                     help="which element do you want to highlight in the heatmap output? [sulfur, hydrogen, "
                          "methane, nitrogen, oxygen, carbon-monoxide, C1compounds, carbon, urea,"
-                         "halogenetated-compounds, arsenic, selenium, nitriles, iron, ROS, ALL] (default = ALL)",
+                         "halogenetated-compounds, arsenic, selenium, nitriles, iron, ALL] (default = ALL)",
                     default="ALL")
 
 parser.add_argument('--only_heat', type=str, help="subvert all other functions of this scpript and only make the"
@@ -761,6 +761,12 @@ if args.only_heat == "n":
         elif "CymA" in ls:
             if ("MtrB_TIGR03509" not in ls and "MtrA" not in ls and "MtoA" not in ls and "MtrC_TIGR03507" not in ls):
                 pass
+            else:
+                if "MtrC_TIGR03507" in ls:
+                    out.write(j[0] + "," + "iron-reduction" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+                else:
+                    out.write(j[0] + "," + "iron-oxidation" + "," + j[2] + "," + j[3] + "," + j[4] + "," + j[5] + "\n")
+
         ############################################################################################################
         elif "thiosulfate_oxidation_soxB" in ls or "thiosulfate_oxidation_soxY" in ls or "thiosulfate_oxidation_soxC" in ls \
                 or "soxA" in ls or "soxX" in ls or "soxZ" in ls:
@@ -1703,7 +1709,7 @@ if args.only_heat == "n":
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
                     "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1808,7 +1814,7 @@ if args.only_heat == "n":
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
                     "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1845,7 +1851,7 @@ if args.only_heat == "n":
             elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
                         "carbon-monoxide", "C1compounds", "carbon",
                         "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron", "ROS"]
+                        "nitriles", "iron"]
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -1910,7 +1916,7 @@ if args.only_heat == "n":
     else:
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2049,7 +2055,7 @@ else:
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
                     "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2086,7 +2092,7 @@ else:
             elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
                         "carbon-monoxide", "C1compounds", "carbon",
                         "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron", "ROS"]
+                        "nitriles", "iron"]
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2144,7 +2150,7 @@ else:
                 print("Finished!")
 
             else:
-                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please "
                       "try again by choosing another element, or checking your spelling.")
 
     # COVERAGE-BASED ABUNDANCE USING ONLY ONE BAM FILE
@@ -2169,7 +2175,7 @@ else:
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
                     "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2206,7 +2212,7 @@ else:
             elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
                         "carbon-monoxide", "C1compounds", "carbon",
                         "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron", "ROS"]
+                        "nitriles", "iron"]
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2264,14 +2270,14 @@ else:
                 print("Finished!")
 
             else:
-                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please "
                       "try again by choosing another element, or checking your spelling.")
 
     # GENE COUNTS-BASED ABUNDANCE
     else:
         if args.element == "ALL":
             cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron", "ROS"]
+                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2314,7 +2320,8 @@ else:
             elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
                         "carbon-monoxide", "C1compounds", "carbon",
                         "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron", "ROS"]
+                        "nitriles", "iron"]
+
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2378,7 +2385,7 @@ else:
                 print(".......")
                 print("Finished!")
             else:
-                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please"
+                print("Looks like the element you have chosen is not one that is recognized by LithoGenie. Please "
                       "try again by choosing another element, or checking your spelling.")
 
 # ******** RUNNING RSCRIPT TO GENERATE PLOTS **************
