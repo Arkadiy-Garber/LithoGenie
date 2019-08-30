@@ -1707,9 +1707,14 @@ if args.only_heat == "n":
         os.system("mv %s/*depth %s/contigDepths/" % (args.outdir, args.outdir))
 
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
-                    "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(element)
+            elements = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1812,9 +1817,14 @@ if args.only_heat == "n":
                     depthDict[LS[0]] = LS[2]
 
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
-                    "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(element)
+            elements = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -1848,10 +1858,16 @@ if args.only_heat == "n":
             print("Finished!")
 
         else:
-            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
-                        "carbon-monoxide", "C1compounds", "carbon",
-                        "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron"]
+
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            elements = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in elements:
+                    elements.append(element)
+            elements = sorted(elements)
+
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -1915,8 +1931,14 @@ if args.only_heat == "n":
     # GENE COUNTS-BASED ABUNDANCE
     else:
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(element)
+            elements = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2053,9 +2075,14 @@ else:
                         depthDict[cell][LS[0]] = LS[2]
 
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
-                    "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(element)
+            cats = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2089,10 +2116,15 @@ else:
             print("Finished!")
 
         else:
-            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
-                        "carbon-monoxide", "C1compounds", "carbon",
-                        "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            elements = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in elements:
+                    elements.append(element)
+            elements = sorted(elements)
+
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2173,9 +2205,14 @@ else:
                     depthDict[LS[0]] = LS[2]
 
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide",
-                    "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(cats)
+            cats = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2209,10 +2246,15 @@ else:
             print("Finished!")
 
         else:
-            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
-                        "carbon-monoxide", "C1compounds", "carbon",
-                        "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            elements = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in elements:
+                    elements.append(element)
+            elements = sorted(elements)
+
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
                 bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2276,8 +2318,14 @@ else:
     # GENE COUNTS-BASED ABUNDANCE
     else:
         if args.element == "ALL":
-            cats = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen", "C1compounds", "carbon-monoxide", "carbon",
-                    "urea", "halogenated-compounds", "arsenic", "selenium", "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            cats = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in cats:
+                    cats.append(element)
+            cats = sorted(cats)
 
             Dict = defaultdict(lambda: defaultdict(list))
             final = open("%s/%s-summary.csv" % (args.outdir, args.out), "r")
@@ -2317,10 +2365,18 @@ else:
             print("Finished!")
 
         else:
-            elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
-                        "carbon-monoxide", "C1compounds", "carbon",
-                        "urea", "halogenetated-compounds", "arsenic", "selenium",
-                        "nitriles", "iron"]
+            bits = open(HMMdir + "/hmm-meta.txt", "r")
+            elements = []
+            for i in bits:
+                ls = (i.rstrip().split("\t"))
+                element = ls[3]
+                if element not in elements:
+                    elements.append(element)
+            elements = sorted(elements)
+            # elements = ["sulfur", "hydrogen", "methane", "nitrogen", "oxygen",
+            #             "carbon-monoxide", "C1compounds", "carbon",
+            #             "urea", "halogenetated-compounds", "arsenic", "selenium",
+            #             "nitriles", "iron"]
 
             if args.element in elements:
                 elementDict = defaultdict(lambda: defaultdict(list))
