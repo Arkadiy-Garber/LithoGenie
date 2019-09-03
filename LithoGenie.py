@@ -1708,7 +1708,7 @@ if args.only_heat == "n":
                     LS = k.rstrip().split("\t")
                     if LS[0] != "contigName":
                         depthDict[cell][LS[0]] = LS[2]
-                        total += LS[2]
+                        total += float(LS[2])
                 normDict[cell] = total / 1000000
 
         os.system("mkdir %s/contigDepths" % args.outdir)
