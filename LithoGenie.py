@@ -1680,6 +1680,7 @@ if args.only_heat == "n":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
         BAMmapDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
         BAMmap = open(args.bams)
+        normDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
         for i in BAMmap:
             string = ''
             ls = i.rstrip().split("\t")
@@ -1687,21 +1688,28 @@ if args.only_heat == "n":
             for j in ls[1:]:
                 string += " "
                 string += j
+
             try:
                 depth = open("%s/%s.depth" % (args.outdir, cell))
+                total = 0
                 for k in depth:
                     LS = k.rstrip().split("\t")
                     if LS[0] != "contigName":
                         depthDict[cell][LS[0]] = LS[2]
+                        total += LS[2]
+                normDict[cell] = total/1000000
 
             except FileNotFoundError:
                 os.system("jgi_summarize_bam_contig_depths --outputDepth %s/%s.depth%s" % (args.outdir, cell, string))
                 print("processing... " + cell)
                 depth = open("%s/%s.depth" % (args.outdir, cell))
+                total = 0
                 for k in depth:
                     LS = k.rstrip().split("\t")
                     if LS[0] != "contigName":
                         depthDict[cell][LS[0]] = LS[2]
+                        total += LS[2]
+                normDict[cell] = total / 1000000
 
         os.system("mkdir %s/contigDepths" % args.outdir)
         os.system("mv %s/*depth %s/contigDepths/" % (args.outdir, args.outdir))
@@ -1739,7 +1747,7 @@ if args.only_heat == "n":
                 outHeat.write(i + ",")
                 for j in sorted(Dict.keys()):
                     if not re.match(r'#', j):
-                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                        outHeat.write(str(SUM(Dict[j][i])/normDict[j]) + ",")
                 outHeat.write("\n")
 
             outHeat.close()
@@ -1802,19 +1810,23 @@ if args.only_heat == "n":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
 
         try:
+            total = 0
             depth = open("%s.depth" % (args.bam))
             for k in depth:
                 LS = k.rstrip().split("\t")
                 if LS[0] != "contigName":
                     depthDict[LS[0]] = LS[2]
+                    total += float(LS[2])
 
         except FileNotFoundError:
             os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth %s" % (args.bam, args.bam))
             depth = open("%s.depth" % (args.bam))
+            total = 0
             for k in depth:
                 LS = k.rstrip().split("\t")
                 if LS[0] != "contigName":
                     depthDict[LS[0]] = LS[2]
+                    total += float(LS[2])
 
         if args.element == "ALL":
             bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2048,6 +2060,7 @@ else:
     if args.bams != "NA":
         depthDict = defaultdict(lambda: defaultdict(lambda: 'EMPTY'))
         BAMmapDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
+        normDict = defaultdict(lambda: defaultdict(lambda: "EMPTY"))
         BAMmap = open(args.bams)
         for i in BAMmap:
             string = ''
@@ -2060,19 +2073,25 @@ else:
             try:
                 print("processing... " + cell)
                 depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
+                total = 0
                 for k in depth:
                     LS = k.rstrip().split("\t")
                     if LS[0] != "contigName":
                         depthDict[cell][LS[0]] = LS[2]
+                        total += float(LS[2])
+                normDict[cell] = total
 
             except FileNotFoundError:
                 os.system("jgi_summarize_bam_contig_depths --outputDepth %s.depth%s" % (cell, string))
                 print("processing... " + cell)
                 depth = open("%s/contigDepths/%s.depth" % (args.outdir, cell))
+                total = 0
                 for k in depth:
                     LS = k.rstrip().split("\t")
                     if LS[0] != "contigName":
                         depthDict[cell][LS[0]] = LS[2]
+                        total += float(LS[2])
+                normDict[cell] = total
 
         if args.element == "ALL":
             bits = open(HMMdir + "/hmm-meta.txt", "r")
@@ -2107,7 +2126,7 @@ else:
                 outHeat.write(i + ",")
                 for j in sorted(Dict.keys()):
                     if not re.match(r'#', j):
-                        outHeat.write(str(SUM(Dict[j][i])) + ",")
+                        outHeat.write(str(SUM(Dict[j][i])/normDict[j]) + ",")
                 outHeat.write("\n")
 
             outHeat.close()
