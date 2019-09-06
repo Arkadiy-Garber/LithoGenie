@@ -341,6 +341,8 @@ parser.add_argument('--only_heat', type=str, help="subvert all other functions o
 
 parser.add_argument('--cpu', type=int, help="number of threads to allow for hmmsearch (default = 1)", default=1)
 
+parser.add_argument('--norm', type=str, help="normalize gene counts to total number of predicted ORFs in each genome or metagenome (y = yes, n = no) (default = yes)", default="yes")
+
 # CHECKING FOR CONDA INSTALL
 os.system("echo ${HMM_dir}/hmm-meta.txt > HMMlib.txt")
 file = open("HMMlib.txt")
@@ -1981,7 +1983,10 @@ if args.only_heat == "n":
                 outHeat.write(i + ",")
                 for j in sorted(Dict.keys()):
                     if not re.match(r'#', j):
-                        outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
+                        if args.norm == "y":
+                            outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
+                        else:
+                            outHeat.write(str((len(Dict[j][i]))) + ",")
                 outHeat.write("\n")
             outHeat.close()
 
@@ -2044,7 +2049,10 @@ if args.only_heat == "n":
                     outHeat.write(i + "--" + j + ",")
                     for k in sorted(Dict.keys()):
                         if not re.match(r'#', j):
-                            outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
+                            if args.norm == "y":
+                                outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
+                            else:
+                                outHeat.write(str((len(Dict[k][j]))) + ",")
                     outHeat.write("\n")
 
             outHeat.close()
@@ -2375,7 +2383,10 @@ else:
                 outHeat.write(i + ",")
                 for j in sorted(Dict.keys()):
                     if not re.match(r'#', j):
-                        outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
+                        if args.norm == "y":
+                            outHeat.write(str((len(Dict[j][i]) / int(normDict[j])) * float(100)) + ",")
+                        else:
+                            outHeat.write(str((len(Dict[j][i]))) + ",")
                 outHeat.write("\n")
             outHeat.close()
 
@@ -2452,7 +2463,10 @@ else:
                         outHeat.write(i + "--" + j + ",")
                         for k in sorted(Dict.keys()):
                             if not re.match(r'#', j):
-                                outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
+                                if args.norm == "y":
+                                    outHeat.write(str((len(Dict[k][j]) / int(normDict[k])) * float(100)) + ",")
+                                else:
+                                    outHeat.write(str((len(Dict[k][j]))) + ",")
                         outHeat.write("\n")
 
                 outHeat.close()
