@@ -5,7 +5,7 @@ Detailed Wiki coming soon!
 HMMs used in this program come from a variety of sources, including TIGRFAMS and Pfam. Twenty-five of the HMMs used here have been created by Karthik Anantharaman (https://github.com/kanantharaman/metabolic-hmms; link to relevant article: https://www.nature.com/articles/ncomms13219#supplementary-information). Some of the HMMs (namely, the ones invovled in iron oxidation and reduction) were designed and calibrated by me.
 
 ## Quickstart with conda (The script is ready-to-use and conda should take care of all dependencies)
-gitMore clone https://github.com/Arkadiy-Garber/GeoGenie.git
+git clone https://github.com/Arkadiy-Garber/GeoGenie.git
 
 ./setup.sh
 
