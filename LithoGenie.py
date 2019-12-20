@@ -341,7 +341,7 @@ parser.add_argument('--only_heat', type=str, help="subvert all other functions o
 
 parser.add_argument('--cpu', type=int, help="number of threads to allow for hmmsearch (default = 1)", default=1)
 
-parser.add_argument('--norm', type=str, help="normalize gene counts to total number of predicted ORFs in each genome or metagenome (y = yes, n = no) (default = yes)", default="yes")
+parser.add_argument('--norm', type=str, help="normalize gene counts to total number of predicted ORFs in each genome or metagenome (y = yes, n = no) (default = yes)", default="y")
 
 # CHECKING FOR CONDA INSTALL
 os.system("echo ${HMM_dir}/hmm-meta.txt > HMMlib.txt")
