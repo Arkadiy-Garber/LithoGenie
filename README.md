@@ -4,7 +4,6 @@
 
 
 
-Detailed Wiki coming soon!
 
 HMM-based pipeline for functional annotation of genome and metagenome assemblies.
 
