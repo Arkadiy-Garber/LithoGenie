@@ -1,6 +1,7 @@
 # LithoGenie
 
-### NOTE: This version of standalone LithoGenie is no longer supported. But don't despair. This software, along with it's features and more, have been transferred into this repository: [https://github.com/Arkadiy-Garber/MagicLamp](https://github.com/Arkadiy-Garber/MagicLamp). There, Lithogenie is part of a larger package if Genies.
+#### NOTE: This version of standalone LithoGenie is no longer supported. But don't despair. This software, along with it's features and more, have been transferred into this repository: [https://github.com/Arkadiy-Garber/MagicLamp](https://github.com/Arkadiy-Garber/MagicLamp). There, Lithogenie is part of a larger package if Genies.
+
 
 
 
